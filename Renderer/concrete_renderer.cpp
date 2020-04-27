@@ -19,6 +19,11 @@
 #include <cmath>
 
 
+// From the pre build event
+#include "vs.glsl.h"
+#include "fs.glsl.h"
+
+
 #define VS_PATH "C:\\Users\\MGOMES1\\Desktop\\audioVisualiser\\vs.glsl"
 #define FS_PATH "C:\\Users\\MGOMES1\\Desktop\\audioVisualiser\\fs.glsl"
 
