@@ -10,11 +10,18 @@
 class VertexShader : public AbstractShader
 {
 public:
-	VertexShader(const std::string& path) : AbstractShader(path)
-	{}
+	VertexShader(const ByteArray& b) 
+		: AbstractShader(b)
+	{
+	}
 
-	// Only function to override
-	int getGlEnum() const override
+	VertexShader(ByteArray&& b)
+		: AbstractShader(std::forward<ByteArray>(b))
+	{
+	}
+
+private:
+	int _get_shader_type() const override
 	{
 		return GL_VERTEX_SHADER;
 	}

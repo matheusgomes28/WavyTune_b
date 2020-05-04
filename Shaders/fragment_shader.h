@@ -10,10 +10,19 @@
 class FragmentShader : public AbstractShader
 {
 public:
-	FragmentShader(const std::string& path) : AbstractShader(path)
-	{}
+	
+	FragmentShader(const ByteArray& b)
+		: AbstractShader(b)
+	{
+	}
 
-	int getGlEnum() const override
+	FragmentShader(ByteArray&& b)
+		: AbstractShader(std::forward<ByteArray>(b))
+	{
+	}
+
+private:
+	int _get_shader_type() const override
 	{
 		return GL_FRAGMENT_SHADER;
 	}

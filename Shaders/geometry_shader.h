@@ -10,10 +10,18 @@
 class GeometryShader : public AbstractShader
 {
 public:
-	GeometryShader(const std::string& path) : AbstractShader(path)
-	{}
+	GeometryShader(const ByteArray& b)
+		: AbstractShader(b)
+	{
+	}
+	
+	GeometryShader(ByteArray&& b)
+		: AbstractShader(std::forward<ByteArray>(b))
+	{
+	}
 
-	int getGlEnum() const override
+private:
+	int _get_shader_type() const override
 	{
 		return GL_GEOMETRY_SHADER;
 	}

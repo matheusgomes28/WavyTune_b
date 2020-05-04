@@ -7,37 +7,6 @@
 // Includes from the STD
 #include <string>
 
-// TODO : Make sure this is all done correctly with inheritance
-// and abstraction.
-class TextReader;
-class AbstractShader
-{
-public:
-	AbstractShader(const std::string& path);
-	AbstractShader(const AbstractShader& fromCopy);
-	AbstractShader(AbstractShader&& fromMover);
-	~AbstractShader();
-
-	void compile();
-	unsigned int getAddress() const;
-	std::string getCompileMessage() const;
-
-	AbstractShader& operator=(const AbstractShader& fromcopy);
-	AbstractShader&& operator=(AbstractShader&& fromMove);
-
-
-private:
-	std::string path;
-	unsigned int address;
-	TextReader* reader;
-
-	unsigned int generateBuffer() const;
-	std::string loadShaderData() const;
-	virtual int getGlEnum() const = 0;
-
-};
-
-
 class ShaderException : public std::runtime_error
 {
 public:
@@ -47,13 +16,14 @@ public:
 private:
 	std::string message_;
 };
-class AbstractShaderB
+
+class AbstractShader
 {
 public:
 
 	// Expensive copy here
-	AbstractShaderB(const ByteArray&);
-	AbstractShaderB(ByteArray&&);
+	AbstractShader(const ByteArray&);
+	AbstractShader(ByteArray&&);
 
 	bool compile();
 	unsigned int get_address() const;
@@ -64,7 +34,7 @@ private:
 	ByteArray data_;
 	
 
-	unsigned int _get_shader_type();
+	virtual int _get_shader_type() const = 0;
 };
 
 #endif //SHADERS_ABSRACT_SHADER_H

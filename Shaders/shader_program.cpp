@@ -12,44 +12,52 @@
 // Includes from third party
 #include <glm/gtc/type_ptr.hpp>
 
+void ShaderProgram::set_fragment_shader(std::unique_ptr<FragmentShader> fs)
+{
+	fs_ = std::move(fs);
+}
 
-ShaderProgram::ShaderProgram(const std::string& vsPath, const std::string& fsPath)
-	: vs_(new VertexShader(vsPath)),
-	fs_(new FragmentShader(fsPath)),
-	gs_(nullptr)
-{}
+void ShaderProgram::set_geometry_shader(std::unique_ptr<GeometryShader> gs)
+{
+	gs_ = std::move(gs);
+}
 
-ShaderProgram::ShaderProgram(const std::string& vsPath, const std::string& gsPath, const std::string& fsPath)
-	: vs_(new VertexShader(vsPath)),
-	fs_(new FragmentShader(fsPath)),
-	gs_(new GeometryShader(gsPath))
-{}
+void ShaderProgram::set_vertex_shader(std::unique_ptr<VertexShader> vs)
+{
+	vs_ = std::move(vs);
+}
 
-
-GLuint ShaderProgram::generateAddress() const
+GLuint ShaderProgram::_generate_address() const
 {
 	return glCreateProgram();
 }
 
-void ShaderProgram::compileAndLink()
+void ShaderProgram::compile_and_link()
 {
 	// Generate the address for this program
-	address_ = generateAddress();
+	address_ = _generate_address();
 
 	// Compile all the shaders, generating the
 	// OpenGL address_
-	vs_->compile();
-	if (gs_) {
-		gs_->compile();
-	}
-	fs_->compile();
 
-	std::cout << "Vertex Shader: " << vs_->getCompileMessage() << std::endl;
-	std::cout << "Fragment Shader: " << fs_->getCompileMessage() << std::endl;
-	if (gs_) std::cout << "Geometry Shader: " << gs_->getCompileMessage() << std::endl;
+	_compile_if_necessary(*vs_);
+	if (gs_) _compile_if_necessary(*vs_);
+	_compile_if_necessary(*vs_);
+
+	std::cout << "Vertex Shader: " << vs_->get_compilation_message() << std::endl;
+	std::cout << "Fragment Shader: " << fs_->get_compilation_message() << std::endl;
+	if (gs_) std::cout << "Geometry Shader: " << gs_->get_compilation_message() << std::endl;
 
 	// Link all the shaders
-	linkShaders();
+	_link_shaders();
+}
+
+void ShaderProgram::_compile_if_necessary(AbstractShader& s)
+{
+	if (s.get_address() == 0)
+	{
+		s.compile();
+	}
 }
 
 void ShaderProgram::use()
@@ -66,15 +74,15 @@ void ShaderProgram::unuse()
 {
 }
 
-void ShaderProgram::linkShaders()
+void ShaderProgram::_link_shaders()
 {
 	if (address_ > 0) {
 		// Need to attach all the addresses
-		glAttachShader(address_, vs_->getAddress());
+		glAttachShader(address_, vs_->get_address());
 		if (gs_) {
-			glAttachShader(address_, gs_->getAddress());
+			glAttachShader(address_, gs_->get_address());
 		}
-		glAttachShader(address_, fs_->getAddress());
+		glAttachShader(address_, fs_->get_address());
 		glLinkProgram(address_);
 	}
 	else {
@@ -82,7 +90,7 @@ void ShaderProgram::linkShaders()
 	}
 }
 
-GLuint ShaderProgram::getAddress() const
+GLuint ShaderProgram::get_address() const
 {
 	return address_;
 }
@@ -148,22 +156,6 @@ void ShaderProgram::setUniform(const std::string& name, const glm::mat4& value) 
 
 ShaderProgram::~ShaderProgram()
 {
-	// Simple deletion of the pointers
-	if (vs_) {
-		delete vs_;
-		vs_ = nullptr;
-	}
-
-	if (gs_) {
-		delete gs_;
-		gs_ = nullptr;
-	}
-
-	if (fs_) {
-		delete fs_;
-		fs_ = nullptr;
-	}
-
 	// Delete if the address exists
 	if (address_ > 0) {
 		glDeleteProgram(address_);

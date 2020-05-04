@@ -2,6 +2,7 @@
 #define SHADER_SHADER_PROGRAM_H
 
 // Includes from the STD
+#include <memory>
 #include <string>
 
 // Includes from third party
@@ -10,6 +11,7 @@
 #include <GL/freeglut.h>
 
 
+class AbstractShader;
 class VertexShader;
 class FragmentShader;
 class GeometryShader;
@@ -17,9 +19,14 @@ class ShaderProgram
 {
 
 public:
-	ShaderProgram(const std::string& vsPath, const std::string& fsPath);
-	ShaderProgram(const std::string& vsPath, const std::string& gsPath, const std::string& fsPath);
+	
 	~ShaderProgram();
+
+	// Setting the stuff
+	void set_vertex_shader(std::unique_ptr<VertexShader> vs);
+	void set_geometry_shader(std::unique_ptr<GeometryShader> gs);
+	void set_fragment_shader(std::unique_ptr<FragmentShader> fs);
+
 
 	// Uniform setting stuff
 	void setUniform(const std::string& name, const int& value) const;
@@ -30,23 +37,24 @@ public:
 	void setUniform(const std::string& name, const glm::vec3& value) const;
 	void setUniform(const std::string& name, const glm::mat4& value) const;
 
-	void compileAndLink();
+	void compile_and_link();
 	void use();
 	void unuse();
 
-	GLuint getAddress() const;
+	GLuint get_address() const;
 
 private:
 
 	// The shaders we have
-	VertexShader* vs_;
-	GeometryShader* gs_;
-	FragmentShader* fs_;
+	std::unique_ptr<VertexShader> vs_;
+	std::unique_ptr<GeometryShader> gs_;
+	std::unique_ptr<FragmentShader> fs_;
 
 	// Gl related stuff
 	GLuint address_ = 0;
 
-	GLuint generateAddress() const;
-	void linkShaders();
+	GLuint _generate_address() const;
+	void _compile_if_necessary(AbstractShader& s);
+	void _link_shaders();
 };
 #endif // SHADER_SHADER_PROGRAM_H

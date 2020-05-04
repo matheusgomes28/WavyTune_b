@@ -9,13 +9,23 @@ ByteArrayException::ByteArrayException(std::string err_message)
 {
 }
 
-const char* ByteArrayException::what() const
+const char* ByteArrayException::what() const noexcept
 {
 	return message_.c_str();
 }
 
 ByteArray::ByteArray(std::size_t size)
 	: data_{ std::vector<Byte>(size) }
+{
+}
+
+ByteArray::ByteArray(const ByteArray& from)
+	: data_{from.data_}
+{
+}
+
+ByteArray::ByteArray(ByteArray&& from)
+	: data_{ std::move(from.data_) }
 {
 }
 
@@ -43,4 +53,16 @@ void ByteArray::set_data(Byte* data, std::size_t size, std::size_t offset)
 	{
 		throw ByteArrayException("data given lies out of bound");
 	}
+}
+
+ByteArray& ByteArray::operator=(ByteArray&& from)
+{
+	this->data_ = std::move(from.data_);
+	return *this;
+}
+
+ByteArray& ByteArray::operator=(const ByteArray& from)
+{
+	this->data_ = from.data_;
+	return *this;
 }
