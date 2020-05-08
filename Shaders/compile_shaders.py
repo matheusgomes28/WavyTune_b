@@ -33,7 +33,7 @@ def create_header_file(file_name : str):
         g.write("#ifndef SHADER_FILE_{:s}".format(ifndef_name.upper()))
         g.write("\n#define SHADER_FILE_{:s}".format(ifndef_name.upper()))
 
-        g.write("\nchar ")
+        g.write("\nunsigned char ")
         g.write(h_file_name.split('.')[0]+"[]")
         g.write(" = {")
         g.write(new_contents)

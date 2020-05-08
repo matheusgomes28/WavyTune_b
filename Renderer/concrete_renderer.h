@@ -6,7 +6,9 @@
 
 // Includes from the std
 #include <map>
-#include <exception>
+#include <memory>
+#include <stdexcept>
+#include <string>
 
 
 class VAO;
@@ -20,74 +22,77 @@ enum class BUFFER_TYPE { VERTEX, NORMAL, TEXTURE, COLOUR };
 
 
 // Maybe bring this to another file, modularise
-class ConcreteRendererException : public std::exception
+class ConcreteRendererException : public std::runtime_error
 {
 public:
-	virtual const char* what() const override
+	ConcreteRendererException(const std::string& message)
+		: std::runtime_error{message}
 	{
-		return "Default concrete renderer error.";
 	}
 };
 
-class BufferNotFoundException : public ConcreteRendererException
+class VertexBufferNotFoundException : public ConcreteRendererException
 {
 public:
-	virtual const char* what() const override
+	VertexBufferNotFoundException()
+		: ConcreteRendererException("vertex buffer was not found")
 	{
-		return "Buffer was not found in memory.";
 	}
 };
 
-class VertexBufferNotFound : public BufferNotFoundException
+class NormalBufferNotFoundException : public ConcreteRendererException
 {
 public:
-	virtual const char* what() const override
+	NormalBufferNotFoundException()
+		: ConcreteRendererException("normal buffer was not found")
 	{
-		return "Vertex buffer was not found.";
 	}
 };
 
-class NormalBufferNotFound : public BufferNotFoundException
+class ColourBufferNotFoundException : public ConcreteRendererException
 {
 public:
-	virtual const char* what() const override
+	ColourBufferNotFoundException()
+		: ConcreteRendererException("colour buffer was not found")
 	{
-		return "Normal buffer was not found.";
 	}
 };
 
-class ColourBufferNotFound : public BufferNotFoundException
+
+class ShaderProgramNotSetException : public ConcreteRendererException
 {
 public:
-	virtual const char* what() const override
+	ShaderProgramNotSetException()
+		: ConcreteRendererException("shader program not set")
 	{
-		return "Colour buffer was not found.";
 	}
 };
 
 
 class ConcreteRenderer : public AbstractRenderer
 {
-	using EntityDataMap = std::map<Entity*, std::vector<DrawBuffer*>>;
+	using EntityDataMap = std::map<EntityPtr, std::vector<DrawBufferPtr>>;
 
+	using VAOPtr = std::unique_ptr<VAO>;
+	using VBOPtr = std::unique_ptr<VBO>;
+ 
 public:
 	ConcreteRenderer();
 	~ConcreteRenderer();
 
 	//! overrides
 	void render(const glm::mat4& proj, const glm::mat4& view) override;
-	void sendGPUData() override;
-	void createGPUBuffers() override;
-	void addEntityData(Entity* entPtr, DrawBuffer* dataPtr) override;
+	void send_gpu_data() override;
+	void add_entity_data(EntityPtr entPtr, DrawBufferPtr dataPtr) override;
 
 
 protected:
-	EntityDataMap entityData_;
-	VAO* vao_;
-	std::map<BUFFER_TYPE, VBO*> vbos_;
+	EntityDataMap entity_data_;
+	VAOPtr vao_;
+	std::map<BUFFER_TYPE, VBOPtr> vbos_;
 
-	void setShader() override;
-	ShaderProgram* getShader() const override;
+	void set_shader(std::unique_ptr<ShaderProgram> shader_ptr) override;
+	ShaderProgram* get_shader() const override;
 
 private:
 
@@ -100,8 +105,8 @@ private:
 	// stuff below
 	//unsigned getMemoryNeeded(const BUFFER_TYPE& bt) const;
 
-	ShaderProgram* shaderProgram_;
-	unsigned pointsToDraw_;
+	std::unique_ptr<ShaderProgram> shader_program_;
+	unsigned points_to_draw_;
 
 	void allocateGPUMemory();
 	void populateBuffers();
@@ -112,8 +117,8 @@ private:
 	void disableBuffers();
 
 
-	VBO* getVertexVBO();
-	VBO* getNormalVBO();
-	VBO* getColourVBO();
+	inline VBO* _get_vertex_vbo();
+	inline VBO* _get_normal_vbo();
+	inline VBO* _get_colour_vbo();
 };
 #endif

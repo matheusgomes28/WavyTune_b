@@ -184,9 +184,8 @@ int main(int argc, char* argv)
 	up = { 0, 1, 0 };
 
 	// Create a bar renderer
-	AbstractRenderer* barRenderer = RenderBuilder::buildBarRenderer();
-	barRenderer->createGPUBuffers();
-	barRenderer->sendGPUData();
+	std::unique_ptr<AbstractRenderer> barRenderer = RenderBuilder::buildBarRenderer();
+	barRenderer->send_gpu_data();
 
 	// Game loop
 	while (!glfwWindowShouldClose(window)) {
@@ -204,6 +203,5 @@ int main(int argc, char* argv)
 		glfwPollEvents();
 	}
 
-	delete barRenderer;
 	return 0;
 }

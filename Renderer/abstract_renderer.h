@@ -2,8 +2,9 @@
 #define RENDERERS_ABSTRACT_RENDERER_H
 
 // Includes from the STD
-#include <vector>
 #include <map>
+#include <memory>
+#include <vector>
 
 // Includes from third party libs
 #include <glm/glm.hpp>
@@ -34,15 +35,16 @@ class Entity;
 class AbstractRenderer
 {
 public:
+	using EntityPtr = std::shared_ptr<Entity>;
+	using DrawBufferPtr = std::unique_ptr<DrawBuffer>;
 
 	virtual void render(const glm::mat4& proj, const glm::mat4& view) = 0;
-	virtual void sendGPUData() = 0;
-	virtual void createGPUBuffers() = 0;
-	virtual void addEntityData(Entity* ent, DrawBuffer* data) = 0;
+	virtual void send_gpu_data() = 0;
+	virtual void add_entity_data(EntityPtr ent, DrawBufferPtr data) = 0;
+	virtual void set_shader(std::unique_ptr<ShaderProgram> shader_ptr) = 0;
 
 protected:
-	virtual void setShader() = 0;
-	virtual ShaderProgram* getShader() const = 0;
+	virtual ShaderProgram* get_shader() const = 0;
 };
 #endif
 

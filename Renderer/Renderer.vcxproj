@@ -109,7 +109,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>python $(SolutionDir)renderer\compile_shaders.py</Command>
+      <Command>
+      </Command>
       <Message>Compiling the shaders</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>

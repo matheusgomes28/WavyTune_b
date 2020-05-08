@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 
-using Byte = std::size_t;
+using Byte = unsigned char;
 class ByteArray
 {
 public:

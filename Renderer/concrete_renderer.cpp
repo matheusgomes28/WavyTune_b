@@ -19,14 +19,6 @@
 #include <cmath>
 
 
-// From the pre build event
-#include "vs.glsl.h"
-#include "fs.glsl.h"
-
-
-#define VS_PATH "C:\\Users\\MGOMES1\\Desktop\\audioVisualiser\\vs.glsl"
-#define FS_PATH "C:\\Users\\MGOMES1\\Desktop\\audioVisualiser\\fs.glsl"
-
 std::vector<std::string> getError()
 {
 	std::vector<std::string> retVal;
@@ -66,132 +58,79 @@ std::vector<std::string> getError()
 
 
 ConcreteRenderer::ConcreteRenderer()
-	: shaderProgram_(nullptr),
-	vao_(nullptr),
-	pointsToDraw_{ 0 }
+	: shader_program_(nullptr),
+	vao_(std::make_unique<VAO>()),
+	points_to_draw_{ 0 }
 {
-	setShader();
+	// insert the stuff in vbos
+	auto vertex_vbo = std::make_unique<VBO>();
+	vbos_.insert({BUFFER_TYPE::VERTEX, std::move(vertex_vbo)});
+	auto normal_vbo = std::make_unique<VBO>();
+	vbos_.insert({BUFFER_TYPE::NORMAL, std::move(normal_vbo)});
+	auto colour_vbo = std::make_unique<VBO>();
+	vbos_.insert({BUFFER_TYPE::COLOUR,std::move(colour_vbo)});
 }
 
 ConcreteRenderer::~ConcreteRenderer()
 {
-	if (shaderProgram_) {
-		delete shaderProgram_;
-		shaderProgram_ = nullptr;
-	}
-
-	// Delete each vao and clear vec
-	if (vao_) delete vao_;
-
-	// Delete the buffers this renderer owns
-	for (auto kvPair : vbos_) {
-		if (kvPair.second) {
-			delete kvPair.second;
-		}
-	}
 	vbos_.clear();
-
-	// Delete the entity data
-	for (auto kvPair : entityData_) {
-
-		// Delete the entity ptr
-		if (kvPair.first) delete kvPair.first;
-
-		for (DrawBuffer* buffer : kvPair.second) {
-			if (buffer) delete buffer;
-		}
-	}
-	entityData_.clear();
+	entity_data_.clear();
 }
 
-void ConcreteRenderer::setShader()
+void ConcreteRenderer::set_shader(std::unique_ptr<ShaderProgram> shader_ptr)
 {
-	auto errors = getError();
-	// Make sure we delete it if its 
-	// already created
-	if (shaderProgram_) {
-		delete shaderProgram_;
-		shaderProgram_ = nullptr;
-	}
-
-	// TODO : Create the shader objects here
-	// TODO : Remove hard-coded path for the shaders
-	shaderProgram_ = new ShaderProgram(VS_PATH, FS_PATH);
-	shaderProgram_->compileAndLink();
-	errors = getError();
+	shader_program_ = std::move(shader_ptr);
 }
 
-ShaderProgram* ConcreteRenderer::getShader() const
+ShaderProgram* ConcreteRenderer::get_shader() const
 {
-	return shaderProgram_;
+	return shader_program_.get();
 }
 
-void ConcreteRenderer::createGPUBuffers()
-{
-	auto errors = getError();
-	// Make sure these are smart pointers
-	vao_ = new VAO{};
-
-	VBO* vertexVBO = new VBO{};
-	vbos_.insert({ BUFFER_TYPE::VERTEX, vertexVBO });
-
-	VBO* normalVBO = new VBO{};
-	vbos_.insert({ BUFFER_TYPE::NORMAL, normalVBO });
-
-	VBO* colourVBO = new VBO{};
-	vbos_.insert({ BUFFER_TYPE::COLOUR, colourVBO });
-}
-
-VBO* ConcreteRenderer::getVertexVBO()
+VBO* ConcreteRenderer::_get_vertex_vbo()
 {
 	auto found = vbos_.find(BUFFER_TYPE::VERTEX);
-	if (found != end(vbos_)) {
+	if (found != end(vbos_))
+	{
 		if (found->second) {
-			return found->second;
-		}
-		else {
-			vbos_.erase(BUFFER_TYPE::VERTEX);
+			return found->second.get();
 		}
 	}
 
-	throw VertexBufferNotFound();
+	throw VertexBufferNotFoundException();
 }
 
-VBO* ConcreteRenderer::getNormalVBO()
+VBO* ConcreteRenderer::_get_normal_vbo()
 {
 	auto found = vbos_.find(BUFFER_TYPE::NORMAL);
-	if (found != end(vbos_)) {
-		if (found->second) {
-			return found->second;
-		}
-		else {
-			vbos_.erase(BUFFER_TYPE::NORMAL);
+	if (found != end(vbos_))
+	{
+		if (found->second)
+		{
+			return found->second.get();
 		}
 	}
-
-	throw NormalBufferNotFound();
+	throw NormalBufferNotFoundException();
 }
 
-VBO* ConcreteRenderer::getColourVBO()
+VBO* ConcreteRenderer::_get_colour_vbo()
 {
 	auto found = vbos_.find(BUFFER_TYPE::COLOUR);
-	if (found != end(vbos_)) {
-		if (found->second) {
-			return found->second;
-		}
-		else {
-			vbos_.erase(BUFFER_TYPE::COLOUR);
+	if (found != end(vbos_))
+	{
+		if (found->second)
+		{
+			return found->second.get();
 		}
 	}
-
-	throw ColourBufferNotFound();
+	throw ColourBufferNotFoundException();
 }
 
 
-void ConcreteRenderer::sendGPUData()
+void ConcreteRenderer::send_gpu_data()
 {
-	pointsToDraw_ = 0;
-	getShader()->use();
+	points_to_draw_ = 0;
+	get_shader()->use();
 	glBindVertexArray(vao_->getId());
 
 	// Allocate enough memory at the buffers
@@ -202,34 +141,34 @@ void ConcreteRenderer::sendGPUData()
 	setUpColourBufferAttributes();
 
 	auto errors = getError();
-	getShader()->unuse();
+	get_shader()->unuse();
 }
 
 void ConcreteRenderer::allocateGPUMemory()
 {
 	//! Assumes we have already bound the 
 	//! vertex array object
-	VBO* vertexVBO = getVertexVBO();
+	VBO* vertexVBO = _get_vertex_vbo();
 	vertexVBO->allocateMemory(getVertexMemoryNeeded());
-	VBO* normalVBO = getNormalVBO();
+	VBO* normalVBO = _get_normal_vbo();
 	normalVBO->allocateMemory(getNormalMemoryNeeded());
-	VBO* colourVBO = getColourVBO();
+	VBO* colourVBO = _get_colour_vbo();
 	colourVBO->allocateMemory(getColourMemoryNeeded());
 }
 
 void ConcreteRenderer::populateBuffers()
 {
 
-	VBO* vertexVBO = getVertexVBO();
-	VBO* normalVBO = getNormalVBO();
-	VBO* colourVBO = getColourVBO();
+	VBO* vertexVBO = _get_vertex_vbo();
+	VBO* normalVBO = _get_normal_vbo();
+	VBO* colourVBO = _get_colour_vbo();
 
-	pointsToDraw_ = 0;
+	points_to_draw_= 0;
 	unsigned vertexOffset = 0;
 	unsigned normalOffset = 0;
 	unsigned colourOffset = 0;
-	for (auto& kvPair : entityData_) {
-		for (DrawBuffer* buffer : kvPair.second) {
+	for (auto& kvPair : entity_data_) {
+		for (auto& buffer : kvPair.second) {
 			vertexVBO->addData(buffer->getVertices().getData(), vertexOffset);
 			vertexOffset += buffer->getVertices().getGPUSize();
 			normalVBO->addData(buffer->getNormals().getData(), normalOffset);
@@ -237,7 +176,7 @@ void ConcreteRenderer::populateBuffers()
 			colourVBO->addData(buffer->getColours().getData(), colourOffset);
 			colourOffset += buffer->getNormals().getGPUSize();
 
-			pointsToDraw_ += buffer->getVertices().getData().size();
+			points_to_draw_ += buffer->getVertices().getData().size();
 		}
 	}
 
@@ -247,7 +186,7 @@ void ConcreteRenderer::populateBuffers()
 
 void ConcreteRenderer::setUpVertexBufferAttributes()
 {
-	VBO* vertexVBO = getVertexVBO();
+	VBO* vertexVBO = _get_vertex_vbo();
 	glBindBuffer(GL_ARRAY_BUFFER, vertexVBO->getId());
 
 	VertexAttribute* vertexAttribs = new VertexAttribute;
@@ -259,7 +198,7 @@ void ConcreteRenderer::setUpVertexBufferAttributes()
 	vao_->addBufferConfigs(vertexVBO, vertexAttribs);
 
 	// Get the layout location
-	GLint posPtr = glGetAttribLocation(getShader()->getAddress(), "aPos");
+	GLint posPtr = glGetAttribLocation(get_shader()->get_address(), "aPos");
 
 	glVertexAttribPointer(
 		posPtr,
@@ -275,7 +214,7 @@ void ConcreteRenderer::setUpVertexBufferAttributes()
 
 void ConcreteRenderer::setUpNormalBufferAttributes()
 {
-	VBO* normalVBO = getNormalVBO();
+	VBO* normalVBO = _get_normal_vbo();
 	glBindBuffer(GL_ARRAY_BUFFER, normalVBO->getId());
 
 	VertexAttribute* normalAttribs = new VertexAttribute;
@@ -287,7 +226,7 @@ void ConcreteRenderer::setUpNormalBufferAttributes()
 	vao_->addBufferConfigs(normalVBO, normalAttribs);
 
 	// Get the layout location for normals
-	GLint norPtr = glGetAttribLocation(getShader()->getAddress(), "aNor");
+	GLint norPtr = glGetAttribLocation(get_shader()->get_address(), "aNor");
 
 	glVertexAttribPointer(
 		norPtr,
@@ -303,7 +242,7 @@ void ConcreteRenderer::setUpNormalBufferAttributes()
 
 void ConcreteRenderer::setUpColourBufferAttributes()
 {
-	VBO* colourVBO = getColourVBO();
+	VBO* colourVBO = _get_colour_vbo();
 	glBindBuffer(GL_ARRAY_BUFFER, colourVBO->getId());
 
 	VertexAttribute* colourAttribute = new VertexAttribute;
@@ -315,7 +254,7 @@ void ConcreteRenderer::setUpColourBufferAttributes()
 	vao_->addBufferConfigs(colourVBO, colourAttribute);
 
 	// Get the layout location
-	GLint colPtr = glGetAttribLocation(getShader()->getAddress(), "aCol");
+	GLint colPtr = glGetAttribLocation(get_shader()->get_address(), "aCol");
 
 	glVertexAttribPointer(
 		colPtr,
@@ -339,16 +278,16 @@ void ConcreteRenderer::render(const glm::mat4& proj, const glm::mat4& view)
 	//! buffers in the VAO. Specifically, where is the
 	//! best place to send the information to the GPU?
 	//! Would it be here or in the VAO object itself?
-	getShader()->use();
+	get_shader()->use();
 
 	float green = abs(0.6 + sin(glfwGetTime() * 2) / 2.0);
 	glm::mat4 rotate1 = glm::rotate((float)sin(glfwGetTime() * 2) * 3.14159f, glm::vec3(1, 0, 0));
 	glm::mat4 rotate2 = glm::rotate((float)cos(glfwGetTime() * 2) * 3.14159f, glm::vec3(0, 1, 0));
 
-	getShader()->setUniform("green", green);
-	getShader()->setUniform("proj", proj);
-	getShader()->setUniform("view", view);
-	getShader()->setUniform("rotate", rotate1 * rotate2);
+	get_shader()->setUniform("green", green);
+	get_shader()->setUniform("proj", proj);
+	get_shader()->setUniform("view", view);
+	get_shader()->setUniform("rotate", rotate1 * rotate2);
 
 
 	// Enabling some features
@@ -358,50 +297,50 @@ void ConcreteRenderer::render(const glm::mat4& proj, const glm::mat4& view)
 
 	// Enable vertices and normals for drawing
 	glBindVertexArray(vao_->getId());
-	glDrawArrays(GL_TRIANGLES, 0, pointsToDraw_);
+	glDrawArrays(GL_TRIANGLES, 0, points_to_draw_);
 	glBindVertexArray(0);
 
 
 	disableBuffers();
-	getShader()->unuse();
+	get_shader()->unuse();
 	errors = getError();
 }
 
 void ConcreteRenderer::enableBuffers()
 {
 	// Get the layout locations
-	GLuint vertexPtr = glGetAttribLocation(getShader()->getAddress(), "aPos");
+	GLuint vertexPtr = glGetAttribLocation(get_shader()->get_address(), "aPos");
 	glEnableVertexAttribArray(vertexPtr);
 
-	GLuint normalPtr = glGetAttribLocation(getShader()->getAddress(), "aNor");
+	GLuint normalPtr = glGetAttribLocation(get_shader()->get_address(), "aNor");
 	glEnableVertexAttribArray(normalPtr);
 
-	GLuint colourPtr = glGetAttribLocation(getShader()->getAddress(), "aCol");
+	GLuint colourPtr = glGetAttribLocation(get_shader()->get_address(), "aCol");
 	glEnableVertexAttribArray(colourPtr);
 }
 
 void ConcreteRenderer::disableBuffers()
 {
 	// Get the layout locations
-	GLuint vertexPtr = glGetAttribLocation(getShader()->getAddress(), "aPos");
+	GLuint vertexPtr = glGetAttribLocation(get_shader()->get_address(), "aPos");
 	glDisableVertexAttribArray(vertexPtr);
 
-	GLuint normalPtr = glGetAttribLocation(getShader()->getAddress(), "aNor");
+	GLuint normalPtr = glGetAttribLocation(get_shader()->get_address(), "aNor");
 	glDisableVertexAttribArray(normalPtr);
 
-	GLuint colourPtr = glGetAttribLocation(getShader()->getAddress(), "aCol");
+	GLuint colourPtr = glGetAttribLocation(get_shader()->get_address(), "aCol");
 	glDisableVertexAttribArray(colourPtr);
 }
 
 
-void ConcreteRenderer::addEntityData(Entity* entPtr, DrawBuffer* buffer)
+void ConcreteRenderer::add_entity_data(EntityPtr entPtr, DrawBufferPtr buffer)
 {
-	auto found = entityData_.find(entPtr);
-	if (found != end(entityData_)) {
-		found->second.push_back(buffer);
+	auto found = entity_data_.find(entPtr);
+	if (found != end(entity_data_)) {
+		found->second.push_back( std::move(buffer) );
 	}
 	else {
-		entityData_[entPtr] = { buffer };
+		entity_data_[entPtr] = { std::move(buffer) };
 	}
 }
 
@@ -409,8 +348,8 @@ void ConcreteRenderer::addEntityData(Entity* entPtr, DrawBuffer* buffer)
 unsigned ConcreteRenderer::getVertexMemoryNeeded() const
 {
 	unsigned total = 0;
-	for (auto& kvPair : entityData_) {
-		for (DrawBuffer* dataPtr : kvPair.second) {
+	for (auto& kvPair : entity_data_) {
+		for (auto& dataPtr : kvPair.second) {
 			total += dataPtr->getVertices().getGPUSize();
 		}
 	}
@@ -420,8 +359,8 @@ unsigned ConcreteRenderer::getVertexMemoryNeeded() const
 unsigned ConcreteRenderer::getNormalMemoryNeeded() const
 {
 	unsigned total = 0;
-	for (auto& kvPair : entityData_) {
-		for (DrawBuffer* dataPtr : kvPair.second) {
+	for (auto& kvPair : entity_data_) {
+		for (auto& dataPtr : kvPair.second) {
 			total += dataPtr->getNormals().getGPUSize();
 		}
 	}
@@ -431,8 +370,8 @@ unsigned ConcreteRenderer::getNormalMemoryNeeded() const
 unsigned ConcreteRenderer::getColourMemoryNeeded() const
 {
 	unsigned total = 0;
-	for (auto& kvPair : entityData_) {
-		for (DrawBuffer* dataPtr : kvPair.second) {
+	for (auto& kvPair : entity_data_) {
+		for (auto& dataPtr : kvPair.second) {
 			total += dataPtr->getColours().getGPUSize();
 		}
 	}
