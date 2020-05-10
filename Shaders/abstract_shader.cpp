@@ -54,6 +54,14 @@ bool AbstractShader::compile()
 	}
 }
 
+void AbstractShader::flag_delete()
+{
+	if (address_)
+	{
+		glDeleteShader(address_);
+	}
+}
+
 unsigned int AbstractShader::get_address() const
 {
 	return address_;

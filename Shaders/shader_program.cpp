@@ -95,7 +95,7 @@ GLuint ShaderProgram::get_address() const
 	return address_;
 }
 
-void ShaderProgram::setUniform(const std::string& name, const int& value) const
+void ShaderProgram::set_uniform(const std::string& name, const int& value) const
 {
 	if (address_ > 0) {
 		// Get the location of the uniform then set it
@@ -104,7 +104,7 @@ void ShaderProgram::setUniform(const std::string& name, const int& value) const
 	}
 }
 
-void ShaderProgram::setUniform(const std::string& name, const unsigned int& value) const
+void ShaderProgram::set_uniform(const std::string& name, const unsigned int& value) const
 {
 	if (address_ > 0) {
 		// Get the location of the uniform then set it
@@ -113,7 +113,7 @@ void ShaderProgram::setUniform(const std::string& name, const unsigned int& valu
 	}
 }
 
-void ShaderProgram::setUniform(const std::string& name, const float& value) const
+void ShaderProgram::set_uniform(const std::string& name, const float& value) const
 {
 	if (address_ > 0) {
 		int uniformLoc = glGetUniformLocation(address_, name.c_str());
@@ -121,7 +121,7 @@ void ShaderProgram::setUniform(const std::string& name, const float& value) cons
 	}
 }
 
-void ShaderProgram::setUniform(const std::string& name, const double& value) const
+void ShaderProgram::set_uniform(const std::string& name, const double& value) const
 {
 	if (address_ > 0) {
 		int uniformLoc = glGetUniformLocation(address_, name.c_str());
@@ -129,7 +129,7 @@ void ShaderProgram::setUniform(const std::string& name, const double& value) con
 	}
 }
 
-void ShaderProgram::setUniform(const std::string& name, const glm::vec2& value) const
+void ShaderProgram::set_uniform(const std::string& name, const glm::vec2& value) const
 {
 	if (address_ > 0) {
 		int uniformLoc = glGetUniformLocation(address_, name.c_str());
@@ -137,7 +137,7 @@ void ShaderProgram::setUniform(const std::string& name, const glm::vec2& value) 
 	}
 }
 
-void ShaderProgram::setUniform(const std::string& name, const glm::vec3& value) const
+void ShaderProgram::set_uniform(const std::string& name, const glm::vec3& value) const
 {
 	if (address_ > 0) {
 		int uniformLoc = glGetUniformLocation(address_, name.c_str());
@@ -145,7 +145,7 @@ void ShaderProgram::setUniform(const std::string& name, const glm::vec3& value) 
 	}
 }
 
-void ShaderProgram::setUniform(const std::string& name, const glm::mat4& value) const
+void ShaderProgram::set_uniform(const std::string& name, const glm::mat4& value) const
 {
 	if (address_ > 0) {
 		GLint uniformLoc = glGetUniformLocation(address_, name.c_str());

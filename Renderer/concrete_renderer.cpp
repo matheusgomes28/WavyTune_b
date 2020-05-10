@@ -276,10 +276,10 @@ void ConcreteRenderer::render(const glm::mat4& proj, const glm::mat4& view)
 	glm::mat4 rotate1 = glm::rotate((float)sin(glfwGetTime() * 2) * 3.14159f, glm::vec3(1, 0, 0));
 	glm::mat4 rotate2 = glm::rotate((float)cos(glfwGetTime() * 2) * 3.14159f, glm::vec3(0, 1, 0));
 
-	get_shader()->setUniform("green", green);
-	get_shader()->setUniform("proj", proj);
-	get_shader()->setUniform("view", view);
-	get_shader()->setUniform("rotate", rotate1 * rotate2);
+	get_shader()->set_uniform("green", green);
+	get_shader()->set_uniform("proj", proj);
+	get_shader()->set_uniform("view", view);
+	get_shader()->set_uniform("rotate", rotate1 * rotate2);
 
 
 	// Enabling some features

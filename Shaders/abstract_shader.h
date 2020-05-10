@@ -26,6 +26,7 @@ public:
 	AbstractShader(ByteArray&&);
 
 	bool compile();
+	void flag_delete();
 	unsigned int get_address() const;
 	std::string get_compilation_message() const;
 
