@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include "abstract_draw_data.h"
 
-class ColourData : public AbstractDrawData<glm::vec4>
+class DrawData4 : public AbstractDrawData<glm::vec4>
 {
 public:
 	const DrawVector& getData() const override;

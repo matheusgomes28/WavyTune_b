@@ -3,8 +3,8 @@
 #include "draw_buffer.h"
 #include "draw_data2.h"
 #include "draw_data3.h"
+#include "draw_data4.h"
 #include "indices.h"
-#include "colour_data.h"
 
 DrawBuffer::DrawBuffer()
 	: description_(""),
@@ -52,7 +52,7 @@ const Indices& DrawBuffer::getIndices() const
 	return *indicesPtr_;
 }
 
-const ColourData& DrawBuffer::getColours() const
+const DrawData4& DrawBuffer::getColours() const
 {
 	return *colourPtr_;
 }
@@ -77,9 +77,9 @@ void DrawBuffer::setIndices(Indices* indices)
 	indicesPtr_ = std::unique_ptr<Indices>(indices);
 }
 
-void DrawBuffer::setColours(ColourData* colours)
+void DrawBuffer::setColours(DrawData4* colours)
 {
-	colourPtr_ = std::unique_ptr<ColourData>(colours);
+	colourPtr_ = std::unique_ptr<DrawData4>(colours);
 }
 
 std::string DrawBuffer::getDescription() const

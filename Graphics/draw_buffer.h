@@ -10,13 +10,13 @@
 class DrawData2;
 class DrawData3;
 class Indices;
-class ColourData;
+class DrawData4;
 class DrawBuffer
 {
 	using IndicesPtr = std::unique_ptr<Indices>;
-	using ColourDataPtr = std::unique_ptr<ColourData>;
 	using DrawData2Ptr = std::unique_ptr<DrawData2>;
 	using DrawData3Ptr = std::unique_ptr<DrawData3>;
+	using DrawData4Ptr = std::unique_ptr<DrawData4>;
 public:
 
 	DrawBuffer();
@@ -27,14 +27,14 @@ public:
 	virtual const DrawData3& getNormals() const;
 	virtual const DrawData2& getTexels() const;
 	virtual const Indices& getIndices() const;
-	virtual const ColourData& getColours() const;
+	virtual const DrawData4& getColours() const;
 
 
 	virtual void setVertices(DrawData3* vertices);
 	virtual void setNormals(DrawData3* normals);
 	virtual void setTexels(DrawData2* texels);
 	virtual void setIndices(Indices* indices);
-	virtual void setColours(ColourData* colours);
+	virtual void setColours(DrawData4* colours);
 
 	std::string getDescription() const;
 	void setDescription(const std::string& texels);
@@ -45,8 +45,8 @@ private:
 	DrawData3Ptr verticesPtr_;
 	DrawData3Ptr normalsPtr_;
 	DrawData2Ptr texelsPtr_;
+	DrawData4Ptr colourPtr_;
 	IndicesPtr indicesPtr_;
-	ColourDataPtr colourPtr_;
 	std::string description_;
 	//! virtual void setUp() = 0;
 };

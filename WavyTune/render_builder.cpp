@@ -3,7 +3,7 @@
 #include "GLAbstractions/vbo.h"
 #include "GLAbstractions/vertex_attribute.h"
 #include "Graphics/draw_data3.h"
-#include "Graphics/colour_data.h"
+#include "Graphics/draw_data4.h"
 #include "Graphics/draw_buffer.h"
 #include "Graphics/entity.h"
 
@@ -188,7 +188,7 @@ std::unique_ptr<AbstractRenderer> RenderBuilder::buildBarRenderer()
 		{0, 0, 1, 1},
 		{0, 0, 1, 1}
 	};
-	ColourData* colours = new ColourData();
+	DrawData4* colours = new DrawData4();
 	colours->setData(colour_array);
 	bar_buffer->setColours(colours);
 

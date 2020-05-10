@@ -21,9 +21,6 @@
     <ClInclude Include="abstract_draw_data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="colour_data.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="draw_buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,12 +36,12 @@
     <ClInclude Include="indices.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="draw_data4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="colour_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="draw_buffer.cpp">
@@ -60,6 +57,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="indices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="draw_data4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

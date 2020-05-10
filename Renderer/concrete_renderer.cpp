@@ -5,8 +5,8 @@
 #include "GLAbstractions/vao.h"
 #include "GLAbstractions/vbo.h"
 #include "GLAbstractions/vertex_attribute.h"
-#include "Graphics/colour_data.h"
 #include "Graphics/draw_data3.h"
+#include "Graphics/draw_data4.h"
 #include "Graphics/draw_buffer.h"
 #include "Shaders/shader_program.h"
 

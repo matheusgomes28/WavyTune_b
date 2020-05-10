@@ -10,30 +10,6 @@
 #include <stdexcept>
 #include <string>
 
-
-// Includes from this project
-#include "concrete_renderer.h"
-
-// Includes from WavyTune other libs
-#include "GLAbstractions/vao.h"
-#include "GLAbstractions/vbo.h"
-#include "GLAbstractions/vertex_attribute.h"
-#include "Graphics/colour_data.h"
-#include "Graphics/draw_data3.h"
-#include "Graphics/draw_buffer.h"
-#include "Shaders/shader_program.h"
-
-// Includes from third party
-#include <GLFW/glfw3.h>
-#include <GL/glew.h>
-#include <glm/gtx/transform.hpp>
-
-// Includes from the STD
-#include <cmath>
-
-
-
-
 class VAO;
 class VBO;
 class Entity;

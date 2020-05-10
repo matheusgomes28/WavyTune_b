@@ -144,7 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="abstract_draw_data.h" />
-    <ClInclude Include="colour_data.h" />
+    <ClInclude Include="draw_data4.h" />
     <ClInclude Include="draw_buffer.h" />
     <ClInclude Include="draw_data2.h" />
     <ClInclude Include="draw_data3.h" />
@@ -153,7 +153,7 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="colour_data.cpp" />
+    <ClCompile Include="draw_data4.cpp" />
     <ClCompile Include="draw_buffer.cpp" />
     <ClCompile Include="draw_data2.cpp" />
     <ClCompile Include="draw_data3.cpp" />
