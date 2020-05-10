@@ -4,13 +4,14 @@
 #include "abstract_id_object.h"
 
 #include <map>
+#include <memory>
 #include <string>
 class VBO;
 class VertexAttribute;
 class VAO : public AbstractIdObject
 {
 	using BufferPtr = VBO*;
-	using AttributesPtr = VertexAttribute*;
+	using AttributesPtr = std::unique_ptr<VertexAttribute>;
 	using BufferSettingsMap = std::map<BufferPtr, AttributesPtr>;
 
 public:
@@ -22,7 +23,7 @@ public:
 
 
 private:
-	BufferSettingsMap bufferSettings_;
+	BufferSettingsMap buffer_settings_;
 	void generateId() override;
 };
 #endif

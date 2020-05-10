@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "vao.h"
+#include "vertex_attribute.h"
 
 VAO::VAO()
 	: AbstractIdObject()
@@ -22,10 +23,10 @@ void VAO::generateId()
 
 void VAO::addBufferConfigs(BufferPtr buffer, AttributesPtr attr)
 {
-	bufferSettings_[buffer] = attr;
+	buffer_settings_[buffer] = std::move(attr);
 }
 
 const VAO::BufferSettingsMap& VAO::getBufferConfigs() const
 {
-	return bufferSettings_;
+	return buffer_settings_;
 }
