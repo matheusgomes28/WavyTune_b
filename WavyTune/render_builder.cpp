@@ -6,7 +6,7 @@
 #include "Graphics/colour_data.h"
 #include "Graphics/draw_buffer.h"
 #include "Graphics/entity.h"
-#include "Renderer/abstract_renderer.h"
+
 #include "Renderer/concrete_renderer.h"
 
 #include "Shaders/vertex_shader.h"
@@ -28,7 +28,7 @@ std::unique_ptr<AbstractRenderer> RenderBuilder::buildBarRenderer()
 
 	// Create the entity needed and the data needed
 
-	std::unique_ptr<DrawBuffer> bar_buffer;
+	auto bar_buffer = std::make_unique<DrawBuffer>();
 
 	std::vector<glm::vec3> vertex_array = {
 
@@ -205,12 +205,13 @@ std::unique_ptr<AbstractRenderer> RenderBuilder::buildBarRenderer()
 	auto vertex_shader = std::make_unique<VertexShader>(std::move(vs_data));
 
 	ByteArray fs_data{size(fs)};
-	vs_data.set_data(fs, size(fs));
+	fs_data.set_data(fs, size(fs));
 	auto fragment_shader = std::make_unique<FragmentShader>(std::move(fs_data));
 	
 	auto shader_program = std::make_unique<ShaderProgram>();
 	shader_program->set_vertex_shader(std::move(vertex_shader));
 	shader_program->set_fragment_shader(std::move(fragment_shader));
 	shader_program->compile_and_link();
+	retVal->set_shader(std::move(shader_program));
 	return retVal;
 }

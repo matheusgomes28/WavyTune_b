@@ -73,6 +73,10 @@ std::string AbstractShader::get_compilation_message() const
 			glGetShaderInfoLog(address_, buffer_size, NULL, message_buffer);
 			return message_buffer; // Should be converted to str
 		}
+		else
+		{
+			return "compilation successful";
+		}
 	}
 	else
 	{

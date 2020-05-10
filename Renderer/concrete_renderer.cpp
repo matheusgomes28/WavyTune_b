@@ -13,6 +13,7 @@
 // Includes from third party
 #include <GLFW/glfw3.h>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
 // Includes from the STD
@@ -56,7 +57,6 @@ std::vector<std::string> getError()
 	return retVal;
 }
 
-
 ConcreteRenderer::ConcreteRenderer()
 	: shader_program_(nullptr),
 	vao_(std::make_unique<VAO>()),
@@ -69,12 +69,6 @@ ConcreteRenderer::ConcreteRenderer()
 	vbos_.insert({BUFFER_TYPE::NORMAL, std::move(normal_vbo)});
 	auto colour_vbo = std::make_unique<VBO>();
 	vbos_.insert({BUFFER_TYPE::COLOUR,std::move(colour_vbo)});
-}
-
-ConcreteRenderer::~ConcreteRenderer()
-{
-	vbos_.clear();
-	entity_data_.clear();
 }
 
 void ConcreteRenderer::set_shader(std::unique_ptr<ShaderProgram> shader_ptr)
@@ -158,7 +152,6 @@ void ConcreteRenderer::allocateGPUMemory()
 
 void ConcreteRenderer::populateBuffers()
 {
-
 	VBO* vertexVBO = _get_vertex_vbo();
 	VBO* normalVBO = _get_normal_vbo();
 	VBO* colourVBO = _get_colour_vbo();
@@ -179,7 +172,6 @@ void ConcreteRenderer::populateBuffers()
 			points_to_draw_ += buffer->getVertices().getData().size();
 		}
 	}
-
 	// TODO : figure out how the ssbos will be sent
 	// for the entity transformations
 }
@@ -335,12 +327,14 @@ void ConcreteRenderer::disableBuffers()
 
 void ConcreteRenderer::add_entity_data(EntityPtr entPtr, DrawBufferPtr buffer)
 {
-	auto found = entity_data_.find(entPtr);
+	auto& found = entity_data_.find(entPtr);
 	if (found != end(entity_data_)) {
-		found->second.push_back( std::move(buffer) );
+		found->second.push_back(std::move(buffer));
 	}
 	else {
-		entity_data_[entPtr] = { std::move(buffer) };
+		std::vector<DrawBufferPtr> val;
+		val.push_back(std::move(buffer));
+		entity_data_.insert(std::make_pair(std::move(entPtr), std::move(val)));
 	}
 }
 

@@ -41,8 +41,8 @@ void ShaderProgram::compile_and_link()
 	// OpenGL address_
 
 	_compile_if_necessary(*vs_);
-	if (gs_) _compile_if_necessary(*vs_);
-	_compile_if_necessary(*vs_);
+	if (gs_) _compile_if_necessary(*gs_);
+	_compile_if_necessary(*fs_);
 
 	std::cout << "Vertex Shader: " << vs_->get_compilation_message() << std::endl;
 	std::cout << "Fragment Shader: " << fs_->get_compilation_message() << std::endl;
