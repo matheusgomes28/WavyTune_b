@@ -82,9 +82,9 @@ std::unique_ptr<AbstractRenderer> RenderBuilder::buildBarRenderer()
 		{ 0.5, -0.5, -0.5},
 		{ 0.5, -0.5,  0.5}
 	};
-	DrawData3* vertices = new DrawData3();
+	auto vertices = std::make_unique<DrawData3>();
 	vertices->setData(vertex_array);
-	bar_buffer->setVertices(vertices);
+	bar_buffer->set_vertices(std::move(vertices));
 
 	std::vector<glm::vec3> normal_array = {
 		// Plane 1
@@ -135,9 +135,9 @@ std::unique_ptr<AbstractRenderer> RenderBuilder::buildBarRenderer()
 		{0, 0, 1},
 		{0, 0, 1},
 	};
-	DrawData3* normals = new DrawData3();
+	auto normals = std::make_unique<DrawData3>();
 	normals->setData(normal_array);
-	bar_buffer->setNormals(normals);
+	bar_buffer->set_normals(std::move(normals));
 
 	std::vector<glm::vec4> colour_array{
 		// Plane 1
@@ -188,9 +188,9 @@ std::unique_ptr<AbstractRenderer> RenderBuilder::buildBarRenderer()
 		{0, 0, 1, 1},
 		{0, 0, 1, 1}
 	};
-	DrawData4* colours = new DrawData4();
+	auto colours = std::make_unique<DrawData4>();
 	colours->setData(colour_array);
-	bar_buffer->setColours(colours);
+	bar_buffer->set_colours(std::move(colours));
 
 
 	auto bar_top_entity = std::make_shared<Entity>();

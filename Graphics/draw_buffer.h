@@ -23,21 +23,20 @@ public:
 	DrawBuffer(const std::string& desc);
 	virtual ~DrawBuffer();
 
-	virtual const DrawData3& getVertices() const;
-	virtual const DrawData3& getNormals() const;
-	virtual const DrawData2& getTexels() const;
-	virtual const Indices& getIndices() const;
-	virtual const DrawData4& getColours() const;
+	virtual const DrawData3& get_vertices() const;
+	virtual const DrawData3& get_normals() const;
+	virtual const DrawData2& get_texels() const;
+	virtual const DrawData4& get_colours() const;
+	virtual const Indices& get_indices() const;
 
+	virtual void set_vertices(DrawData3Ptr vertices);
+	virtual void set_normals(DrawData3Ptr normals);
+	virtual void set_texels(DrawData2Ptr texels);
+	virtual void set_colours(DrawData4Ptr colours);
+	virtual void set_indices(IndicesPtr indices);
 
-	virtual void setVertices(DrawData3* vertices);
-	virtual void setNormals(DrawData3* normals);
-	virtual void setTexels(DrawData2* texels);
-	virtual void setIndices(Indices* indices);
-	virtual void setColours(DrawData4* colours);
-
-	std::string getDescription() const;
-	void setDescription(const std::string& texels);
+	std::string get_description() const;
+	void set_description(const std::string& texels);
 
 	//! virtual glm::mat4 getTransform() const = 0;
 

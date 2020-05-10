@@ -32,61 +32,61 @@ DrawBuffer::~DrawBuffer()
 	// will be deleted
 }
 
-const DrawData3& DrawBuffer::getVertices() const
+const DrawData3& DrawBuffer::get_vertices() const
 {
 	return *verticesPtr_;
 }
 
-const DrawData3& DrawBuffer::getNormals() const
+const DrawData3& DrawBuffer::get_normals() const
 {
 	return *normalsPtr_;
 }
 
-const DrawData2& DrawBuffer::getTexels() const
+const DrawData2& DrawBuffer::get_texels() const
 {
 	return *texelsPtr_;
 }
 
-const Indices& DrawBuffer::getIndices() const
+const Indices& DrawBuffer::get_indices() const
 {
 	return *indicesPtr_;
 }
 
-const DrawData4& DrawBuffer::getColours() const
+const DrawData4& DrawBuffer::get_colours() const
 {
 	return *colourPtr_;
 }
 
-void DrawBuffer::setVertices(DrawData3* vertices)
+void DrawBuffer::set_vertices(DrawData3Ptr vertices)
 {
-	verticesPtr_ = std::unique_ptr<DrawData3>(vertices);
+	verticesPtr_ = std::move(vertices);
 }
 
-void DrawBuffer::setNormals(DrawData3* normals)
+void DrawBuffer::set_normals(DrawData3Ptr normals)
 {
-	normalsPtr_ = std::unique_ptr<DrawData3>(normals);
+	normalsPtr_ = std::move(normals);
 }
 
-void DrawBuffer::setTexels(DrawData2* texels)
+void DrawBuffer::set_texels(DrawData2Ptr texels)
 {
-	texelsPtr_ = std::unique_ptr<DrawData2>(texels);
+	texelsPtr_ = std::move(texels);
 }
 
-void DrawBuffer::setIndices(Indices* indices)
+void DrawBuffer::set_indices(IndicesPtr indices)
 {
-	indicesPtr_ = std::unique_ptr<Indices>(indices);
+	indicesPtr_ = std::move(indices);
 }
 
-void DrawBuffer::setColours(DrawData4* colours)
+void DrawBuffer::set_colours(DrawData4Ptr colours)
 {
-	colourPtr_ = std::unique_ptr<DrawData4>(colours);
+	colourPtr_ = std::move(colours);
 }
 
-std::string DrawBuffer::getDescription() const
+std::string DrawBuffer::get_description() const
 {
 	return description_;
 }
-void DrawBuffer::setDescription(const std::string& desc)
+void DrawBuffer::set_description(const std::string& desc)
 {
 	description_ = desc;
 }

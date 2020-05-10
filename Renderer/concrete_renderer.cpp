@@ -162,14 +162,14 @@ void ConcreteRenderer::populateBuffers()
 	unsigned colourOffset = 0;
 	for (auto& kvPair : entity_data_) {
 		for (auto& buffer : kvPair.second) {
-			vertexVBO->addData(buffer->getVertices().getData(), vertexOffset);
-			vertexOffset += buffer->getVertices().getGPUSize();
-			normalVBO->addData(buffer->getNormals().getData(), normalOffset);
-			normalOffset += buffer->getNormals().getGPUSize();
-			colourVBO->addData(buffer->getColours().getData(), colourOffset);
-			colourOffset += buffer->getNormals().getGPUSize();
+			vertexVBO->addData(buffer->get_vertices().getData(), vertexOffset);
+			vertexOffset += buffer->get_vertices().getGPUSize();
+			normalVBO->addData(buffer->get_normals().getData(), normalOffset);
+			normalOffset += buffer->get_normals().getGPUSize();
+			colourVBO->addData(buffer->get_colours().getData(), colourOffset);
+			colourOffset += buffer->get_colours().getGPUSize();
 
-			points_to_draw_ += buffer->getVertices().getData().size();
+			points_to_draw_ += buffer->get_vertices().getData().size();
 		}
 	}
 	// TODO : figure out how the ssbos will be sent
@@ -344,7 +344,7 @@ unsigned ConcreteRenderer::getVertexMemoryNeeded() const
 	unsigned total = 0;
 	for (auto& kvPair : entity_data_) {
 		for (auto& dataPtr : kvPair.second) {
-			total += dataPtr->getVertices().getGPUSize();
+			total += dataPtr->get_vertices().getGPUSize();
 		}
 	}
 	return total;
@@ -355,7 +355,7 @@ unsigned ConcreteRenderer::getNormalMemoryNeeded() const
 	unsigned total = 0;
 	for (auto& kvPair : entity_data_) {
 		for (auto& dataPtr : kvPair.second) {
-			total += dataPtr->getNormals().getGPUSize();
+			total += dataPtr->get_normals().getGPUSize();
 		}
 	}
 	return total;
@@ -366,7 +366,7 @@ unsigned ConcreteRenderer::getColourMemoryNeeded() const
 	unsigned total = 0;
 	for (auto& kvPair : entity_data_) {
 		for (auto& dataPtr : kvPair.second) {
-			total += dataPtr->getColours().getGPUSize();
+			total += dataPtr->get_colours().getGPUSize();
 		}
 	}
 	return total;
