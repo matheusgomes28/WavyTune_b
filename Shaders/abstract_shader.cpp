@@ -58,6 +58,7 @@ void AbstractShader::flag_delete()
 {
 	if (address_)
 	{
+		address_ = 0;
 		glDeleteShader(address_);
 	}
 }

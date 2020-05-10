@@ -49,7 +49,9 @@ void ShaderProgram::compile_and_link()
 	if (gs_) std::cout << "Geometry Shader: " << gs_->get_compilation_message() << std::endl;
 
 	// Link all the shaders
+	_attach_shaders();
 	_link_shaders();
+	_detatch_shaders();
 }
 
 void ShaderProgram::_compile_if_necessary(AbstractShader& s)
@@ -74,18 +76,46 @@ void ShaderProgram::unuse()
 {
 }
 
-void ShaderProgram::_link_shaders()
+void ShaderProgram::_attach_shaders()
 {
-	if (address_ > 0) {
-		// Need to attach all the addresses
+	if (address_ > 0)
+	{
 		glAttachShader(address_, vs_->get_address());
 		if (gs_) {
 			glAttachShader(address_, gs_->get_address());
 		}
 		glAttachShader(address_, fs_->get_address());
+	}
+	else
+	{
+		throw std::logic_error("Address not created created for shader program");
+	}
+}
+
+void ShaderProgram::_link_shaders()
+{
+	if (address_ > 0) {
+		// Need to attach all the addresses
 		glLinkProgram(address_);
 	}
 	else {
+		throw std::logic_error("Address not created created for shader program");
+	}
+}
+
+void ShaderProgram::_detatch_shaders()
+{
+	if (address_ > 0)
+	{
+		glDetachShader(address_, vs_->get_address());
+		if (gs_)
+		{
+			glDetachShader(address_, gs_->get_address());
+		}
+		glDetachShader(address_, fs_->get_address());
+	}
+	else
+	{
 		throw std::logic_error("Address not created created for shader program");
 	}
 }

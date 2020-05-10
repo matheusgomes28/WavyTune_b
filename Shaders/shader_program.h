@@ -55,6 +55,8 @@ private:
 
 	GLuint _generate_address() const;
 	void _compile_if_necessary(AbstractShader& s);
+	void _attach_shaders();
 	void _link_shaders();
+	void _detatch_shaders();
 };
 #endif // SHADER_SHADER_PROGRAM_H
