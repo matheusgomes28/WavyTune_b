@@ -3,10 +3,6 @@
 #include <memory>
 #include <string>
 
-//! TODO : Think about whether this class really needs
-//! to be a virtual class. I think this is pretty general
-//! enough and it should handle all drawing cases.
-
 class DrawData2;
 class DrawData3;
 class Indices;
@@ -23,17 +19,17 @@ public:
 	DrawBuffer(const std::string& desc);
 	virtual ~DrawBuffer();
 
-	virtual const DrawData3& get_vertices() const;
-	virtual const DrawData3& get_normals() const;
-	virtual const DrawData2& get_texels() const;
-	virtual const DrawData4& get_colours() const;
-	virtual const Indices& get_indices() const;
+	const DrawData3& get_vertices() const;
+	const DrawData3& get_normals() const;
+	const DrawData2& get_texels() const;
+	const DrawData4& get_colours() const;
+	const Indices& get_indices() const;
 
-	virtual void set_vertices(DrawData3Ptr vertices);
-	virtual void set_normals(DrawData3Ptr normals);
-	virtual void set_texels(DrawData2Ptr texels);
-	virtual void set_colours(DrawData4Ptr colours);
-	virtual void set_indices(IndicesPtr indices);
+	void set_vertices(DrawData3Ptr vertices);
+	void set_normals(DrawData3Ptr normals);
+	void set_texels(DrawData2Ptr texels);
+	void set_colours(DrawData4Ptr colours);
+	void set_indices(IndicesPtr indices);
 
 	std::string get_description() const;
 	void set_description(const std::string& texels);
