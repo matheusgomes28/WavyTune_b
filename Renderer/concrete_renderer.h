@@ -95,11 +95,11 @@ protected:
 
 private:
 
-	// TODO : Could do function that uses the buffer
-	// type to return the correct amount of data
-	unsigned getVertexMemoryNeeded() const;
-	unsigned getNormalMemoryNeeded() const;
-	unsigned getColourMemoryNeeded() const;
+	// Return the memory of the buffers in bytes
+	unsigned _get_vertex_size() const;
+	unsigned _get_normal_size() const;
+	unsigned _get_colour_size() const;
+
 	// TODO : Think of a smart way of doing the
 	// stuff below
 	//unsigned getMemoryNeeded(const BUFFER_TYPE& bt) const;

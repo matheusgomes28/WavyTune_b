@@ -143,11 +143,11 @@ void ConcreteRenderer::allocateGPUMemory()
 	//! Assumes we have already bound the 
 	//! vertex array object
 	VBO* vertexVBO = _get_vertex_vbo();
-	vertexVBO->allocateMemory(getVertexMemoryNeeded());
+	vertexVBO->allocateMemory(_get_vertex_size());
 	VBO* normal_vbo = _get_normal_vbo();
-	normal_vbo->allocateMemory(getNormalMemoryNeeded());
+	normal_vbo->allocateMemory(_get_normal_size());
 	VBO* colour_vbo = _get_colour_vbo();
-	colour_vbo->allocateMemory(getColourMemoryNeeded());
+	colour_vbo->allocateMemory(_get_colour_size());
 }
 
 void ConcreteRenderer::populateBuffers()
@@ -339,7 +339,7 @@ void ConcreteRenderer::add_entity_data(EntityPtr entPtr, DrawBufferPtr buffer)
 }
 
 
-unsigned ConcreteRenderer::getVertexMemoryNeeded() const
+unsigned ConcreteRenderer::_get_vertex_size() const
 {
 	unsigned total = 0;
 	for (auto& kvPair : entity_data_) {
@@ -350,7 +350,7 @@ unsigned ConcreteRenderer::getVertexMemoryNeeded() const
 	return total;
 }
 
-unsigned ConcreteRenderer::getNormalMemoryNeeded() const
+unsigned ConcreteRenderer::_get_normal_size() const
 {
 	unsigned total = 0;
 	for (auto& kvPair : entity_data_) {
@@ -361,7 +361,7 @@ unsigned ConcreteRenderer::getNormalMemoryNeeded() const
 	return total;
 }
 
-unsigned ConcreteRenderer::getColourMemoryNeeded() const
+unsigned ConcreteRenderer::_get_colour_size() const
 {
 	unsigned total = 0;
 	for (auto& kvPair : entity_data_) {
