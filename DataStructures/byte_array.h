@@ -9,6 +9,7 @@ class ByteArray
 {
 public:
 	ByteArray(std::size_t size);
+	ByteArray(Byte* data, std::size_t size);
 	ByteArray(const ByteArray& from);
 	ByteArray(ByteArray&& from);
 

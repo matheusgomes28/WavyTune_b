@@ -9,6 +9,7 @@ ByteArrayException::ByteArrayException(std::string err_message)
 {
 }
 
+
 const char* ByteArrayException::what() const noexcept
 {
 	return message_.c_str();
@@ -16,6 +17,11 @@ const char* ByteArrayException::what() const noexcept
 
 ByteArray::ByteArray(std::size_t size)
 	: data_{ std::vector<Byte>(size) }
+{
+}
+
+ByteArray::ByteArray(Byte* data, std::size_t size)
+	: data_{ std::vector<Byte>(data, data + size) }
 {
 }
 

@@ -100,10 +100,6 @@ private:
 	unsigned _get_normal_size() const;
 	unsigned _get_colour_size() const;
 
-	// TODO : Think of a smart way of doing the
-	// stuff below
-	//unsigned getMemoryNeeded(const BUFFER_TYPE& bt) const;
-
 	std::unique_ptr<ShaderProgram> shader_program_;
 	unsigned points_to_draw_;
 

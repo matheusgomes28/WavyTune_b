@@ -138,7 +138,8 @@ unsigned vaoId = 0;
 unsigned vertexBufferId = 0;
 unsigned normalBufferId = 0;
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+//int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+int main(int argc, char** argv)
 {
 	glewExperimental = GL_TRUE;
 	glfwInit();

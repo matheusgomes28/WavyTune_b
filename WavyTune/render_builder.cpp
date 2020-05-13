@@ -9,12 +9,9 @@
 
 #include "Renderer/concrete_renderer.h"
 
-#include "Shaders/vertex_shader.h"
-#include "Shaders/fragment_shader.h"
-#include "Shaders/geometry_shader.h"
-#include "Shaders/shader_program.h"
 #include "Shaders/vs.glsl.h"
 #include "Shaders/fs.glsl.h"
+#include "Shaders/shader_builder.h"
 
 template<class T, size_t N>
 constexpr size_t size(T(&)[N])
@@ -200,17 +197,10 @@ std::unique_ptr<AbstractRenderer> RenderBuilder::buildBarRenderer()
 
 	// Create the shader stuff here
 	// TODO : Turn these into a builder
-	ByteArray vs_data{size(vs)};
-	vs_data.set_data(vs, size(vs));
-	auto vertex_shader = std::make_unique<VertexShader>(std::move(vs_data));
-
-	ByteArray fs_data{size(fs)};
-	fs_data.set_data(fs, size(fs));
-	auto fragment_shader = std::make_unique<FragmentShader>(std::move(fs_data));
-	
-	auto shader_program = std::make_unique<ShaderProgram>();
-	shader_program->set_vertex_shader(std::move(vertex_shader));
-	shader_program->set_fragment_shader(std::move(fragment_shader));
+	ShaderBuilder shader_builder;
+	shader_builder.set_fragment_shader({fs, size(fs)});
+	shader_builder.set_vertex_shader({vs, size(vs)});
+	auto shader_program = shader_builder.build();
 	shader_program->compile_and_link();
 	retVal->set_shader(std::move(shader_program));
 	return retVal;

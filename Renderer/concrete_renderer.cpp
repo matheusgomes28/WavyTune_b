@@ -263,7 +263,6 @@ void ConcreteRenderer::setUpColourBufferAttributes()
 void ConcreteRenderer::render(const glm::mat4& proj, const glm::mat4& view)
 {
 	auto errors = getError();
-	//! TODO : Implement this
 
 	//! The last piece of the puzzle. Problem is to
 	//! think about how to link the attributes and
