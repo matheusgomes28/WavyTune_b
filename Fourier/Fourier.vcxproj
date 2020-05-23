@@ -149,6 +149,7 @@
     <ClInclude Include="matrix.h" />
     <ClInclude Include="matrix_exception.h" />
     <ClInclude Include="matrix_row.h" />
+    <ClInclude Include="matrix_traits.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
