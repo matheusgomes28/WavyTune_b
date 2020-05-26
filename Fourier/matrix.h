@@ -133,7 +133,7 @@ public:
 		if (n_rows_ == B.n_rows_)
 		{
 			// TODO : implement type trait for default value
-			Matrix_T<non_const_T, _Matrix_Traits> result{ n_rows_, B.n_cols_, 0};
+			Matrix_T<non_const_T, _Matrix_Traits> result{ n_rows_, B.n_cols_ };
 
 			for (std::size_t row = 0; row < n_rows_; ++row)
 			{
