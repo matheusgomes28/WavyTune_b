@@ -150,6 +150,7 @@
     <ClInclude Include="matrix_row.h" />
     <ClInclude Include="matrix_traits.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="slow_fft.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fourier.cpp" />

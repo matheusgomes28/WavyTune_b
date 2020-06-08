@@ -29,6 +29,7 @@ void VBO::allocateMemory(const unsigned& size) const
 	if (isValid()) {
 		glBindBuffer(GL_ARRAY_BUFFER, getId());
 		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }
 

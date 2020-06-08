@@ -29,6 +29,16 @@ public:
 		}
 	}
 
+	std::size_t n_rows() const
+	{
+		return n_rows_;
+	}
+
+	std::size_t n_cols() const
+	{
+		return n_cols_;
+	}
+
 	MatrixRow<T, _Matrix_Traits> operator[](std::size_t row)
 	{
 		if (row < n_rows_)

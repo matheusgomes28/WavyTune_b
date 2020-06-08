@@ -30,6 +30,9 @@
     <ClInclude Include="matrix_traits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="slow_fft.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
