@@ -60,7 +60,9 @@ std::vector<std::string> getError()
 ConcreteRenderer::ConcreteRenderer()
 	: shader_program_(nullptr),
 	vao_(std::make_unique<VAO>()),
-	points_to_draw_{ 0 }
+	points_to_draw_{ 0 },
+	height_ { 1 },
+	offset_ { 0 }
 {
 	// insert the stuff in vbos
 	auto vertex_vbo = std::make_unique<VBO>();
@@ -81,46 +83,6 @@ ShaderProgram* ConcreteRenderer::get_shader() const
 	return shader_program_.get();
 }
 
-VBO* ConcreteRenderer::_get_vertex_vbo()
-{
-	auto found = vbos_.find(BUFFER_TYPE::VERTEX);
-	if (found != end(vbos_))
-	{
-		if (found->second) {
-			return found->second.get();
-		}
-	}
-
-	throw VertexBufferNotFoundException();
-}
-
-VBO* ConcreteRenderer::_get_normal_vbo()
-{
-	auto found = vbos_.find(BUFFER_TYPE::NORMAL);
-	if (found != end(vbos_))
-	{
-		if (found->second)
-		{
-			return found->second.get();
-		}
-	}
-	throw NormalBufferNotFoundException();
-}
-
-VBO* ConcreteRenderer::_get_colour_vbo()
-{
-	auto found = vbos_.find(BUFFER_TYPE::COLOUR);
-	if (found != end(vbos_))
-	{
-		if (found->second)
-		{
-			return found->second.get();
-		}
-	}
-	throw ColourBufferNotFoundException();
-}
-
-
 void ConcreteRenderer::send_gpu_data()
 {
 	points_to_draw_ = 0;
@@ -128,33 +90,33 @@ void ConcreteRenderer::send_gpu_data()
 	glBindVertexArray(vao_->getId());
 
 	// Allocate enough memory at the buffers
-	allocateGPUMemory();
-	populateBuffers();
-	setUpVertexBufferAttributes();
-	setUpNormalBufferAttributes();
-	setUpColourBufferAttributes();
+	_allocate_gpu_memory();
+	_populate_gpu_buffers();
+	_set_gpu_vertex_attributes();
+	_set_gpu_normal_attributes();
+	_set_gpu_colour_attributes();
 
 	auto errors = getError();
 	get_shader()->unuse();
 }
 
-void ConcreteRenderer::allocateGPUMemory()
+void ConcreteRenderer::_allocate_gpu_memory()
 {
 	//! Assumes we have already bound the 
 	//! vertex array object
-	VBO* vertexVBO = _get_vertex_vbo();
+	VBO* vertexVBO = vbos_[BUFFER_TYPE::VERTEX].get();
 	vertexVBO->allocateMemory(_get_vertex_size());
-	VBO* normal_vbo = _get_normal_vbo();
+	VBO* normal_vbo = vbos_[BUFFER_TYPE::NORMAL].get();
 	normal_vbo->allocateMemory(_get_normal_size());
-	VBO* colour_vbo = _get_colour_vbo();
+	VBO* colour_vbo = vbos_[BUFFER_TYPE::COLOUR].get();
 	colour_vbo->allocateMemory(_get_colour_size());
 }
 
-void ConcreteRenderer::populateBuffers()
+void ConcreteRenderer::_populate_gpu_buffers()
 {
-	VBO* vertexVBO = _get_vertex_vbo();
-	VBO* normal_vbo = _get_normal_vbo();
-	VBO* colour_vbo = _get_colour_vbo();
+	VBO* vertexVBO = vbos_[BUFFER_TYPE::VERTEX].get();
+	VBO* normal_vbo = vbos_[BUFFER_TYPE::NORMAL].get();
+	VBO* colour_vbo = vbos_[BUFFER_TYPE::COLOUR].get();
 
 	points_to_draw_= 0;
 	unsigned vertexOffset = 0;
@@ -176,9 +138,9 @@ void ConcreteRenderer::populateBuffers()
 	// for the entity transformations
 }
 
-void ConcreteRenderer::setUpVertexBufferAttributes()
+void ConcreteRenderer::_set_gpu_vertex_attributes()
 {
-	VBO* vertex_vbo = _get_vertex_vbo();
+	VBO* vertex_vbo = vbos_[BUFFER_TYPE::VERTEX].get();
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_vbo->getId());
 
 	auto vertex_attrib = std::make_unique<VertexAttribute>();
@@ -204,9 +166,9 @@ void ConcreteRenderer::setUpVertexBufferAttributes()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void ConcreteRenderer::setUpNormalBufferAttributes()
+void ConcreteRenderer::_set_gpu_normal_attributes()
 {
-	VBO* normal_vbo = _get_normal_vbo();
+	VBO* normal_vbo = vbos_[BUFFER_TYPE::NORMAL].get();
 	glBindBuffer(GL_ARRAY_BUFFER, normal_vbo->getId());
 
 	auto normal_attrib = std::make_unique<VertexAttribute>();
@@ -232,9 +194,9 @@ void ConcreteRenderer::setUpNormalBufferAttributes()
 	glBindBuffer(GL_VERTEX_ARRAY, 0);
 }
 
-void ConcreteRenderer::setUpColourBufferAttributes()
+void ConcreteRenderer::_set_gpu_colour_attributes()
 {
-	VBO* colour_vbo = _get_colour_vbo();
+	VBO* colour_vbo = vbos_[BUFFER_TYPE::COLOUR].get();
 	glBindBuffer(GL_ARRAY_BUFFER, colour_vbo->getId());
 
 	auto colour_attribute = std::make_unique<VertexAttribute>();
@@ -275,16 +237,16 @@ void ConcreteRenderer::render(const glm::mat4& proj, const glm::mat4& view)
 	glm::mat4 rotate1 = glm::rotate((float)sin(glfwGetTime() * 2) * 3.14159f, glm::vec3(1, 0, 0));
 	glm::mat4 rotate2 = glm::rotate((float)cos(glfwGetTime() * 2) * 3.14159f, glm::vec3(0, 1, 0));
 
-	get_shader()->set_uniform("green", green);
 	get_shader()->set_uniform("proj", proj);
 	get_shader()->set_uniform("view", view);
-	get_shader()->set_uniform("rotate", rotate1 * rotate2);
-
+	get_shader()->set_uniform("rotate", glm::mat4(1));
+	get_shader()->set_uniform("height", height_);
+	get_shader()->set_uniform("offset", offset_);
 
 	// Enabling some features
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	enableBuffers();
+	_enable_gpu_buffers();
 
 	// Enable vertices and normals for drawing
 	glBindVertexArray(vao_->getId());
@@ -292,12 +254,12 @@ void ConcreteRenderer::render(const glm::mat4& proj, const glm::mat4& view)
 	glBindVertexArray(0);
 
 
-	disableBuffers();
+	_disable_gpu_buffers();
 	get_shader()->unuse();
 	errors = getError();
 }
 
-void ConcreteRenderer::enableBuffers()
+void ConcreteRenderer::_enable_gpu_buffers()
 {
 	// Get the layout locations
 	GLuint vertexPtr = glGetAttribLocation(get_shader()->get_address(), "aPos");
@@ -310,7 +272,7 @@ void ConcreteRenderer::enableBuffers()
 	glEnableVertexAttribArray(colourPtr);
 }
 
-void ConcreteRenderer::disableBuffers()
+void ConcreteRenderer::_disable_gpu_buffers()
 {
 	// Get the layout locations
 	GLuint vertexPtr = glGetAttribLocation(get_shader()->get_address(), "aPos");
@@ -369,4 +331,14 @@ unsigned ConcreteRenderer::_get_colour_size() const
 		}
 	}
 	return total;
+}
+
+void ConcreteRenderer::set_height(float h)
+{
+	height_ = h;
+}
+
+void ConcreteRenderer::set_offset(float h)
+{
+	offset_ = h;
 }

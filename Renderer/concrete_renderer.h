@@ -85,6 +85,9 @@ public:
 	void add_entity_data(EntityPtr entPtr, DrawBufferPtr dataPtr) override;
 	void set_shader(std::unique_ptr<ShaderProgram> shader_ptr) override;
 
+	void set_offset(float offset);
+	void set_height(float height);
+
 
 protected:
 	EntityDataMap entity_data_;
@@ -103,17 +106,17 @@ private:
 	std::unique_ptr<ShaderProgram> shader_program_;
 	unsigned points_to_draw_;
 
-	void allocateGPUMemory();
-	void populateBuffers();
-	void setUpVertexBufferAttributes();
-	void setUpNormalBufferAttributes();
-	void setUpColourBufferAttributes();
-	void enableBuffers();
-	void disableBuffers();
+	void _allocate_gpu_memory();
+	void _populate_gpu_buffers();
+	void _set_gpu_vertex_attributes();
+	void _set_gpu_normal_attributes();
+	void _set_gpu_colour_attributes();
+	void _enable_gpu_buffers();
+	void _disable_gpu_buffers();
 
 
-	inline VBO* _get_vertex_vbo();
-	inline VBO* _get_normal_vbo();
-	inline VBO* _get_colour_vbo();
+	// TODO : These are here for testing, remove them in prod
+	float height_;
+	float offset_;
 };
 #endif
