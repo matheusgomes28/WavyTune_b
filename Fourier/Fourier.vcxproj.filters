@@ -30,7 +30,13 @@
     <ClInclude Include="matrix_traits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="slow_fft.h">
+    <ClInclude Include="dft.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sft.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dft_operations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

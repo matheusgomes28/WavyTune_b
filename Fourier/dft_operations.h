@@ -1,37 +1,33 @@
 #ifndef FOURIER_SLOW_FFT_H
 #define FOURIER_SLOW_FFT_H
 
+// Includes from this project
 #include "matrix.h"
+
+// Includes from the std
+#include <cmath>
+#include <functional>
 #include <vector>
+
 
 #define MATH_PI 3.14159265358979323846
 
 using signal = Matrix<std::complex<double>>;
 
-
-Matrix<std::complex<double>> get_multiplier(const std::size_t N)
+enum class FFT_PARTITION : char
 {
-	using namespace std::complex_literals;
+	ODD,
+	EVEN
+};
 
-	const std::complex<double> W = std::exp(-(2.0 * MATH_PI / static_cast<double>(N)) * 1i);
-	
-	// Generating the multiplier matrix
-	Matrix<std::complex<double>> m1{ N,N };
-	for (std::size_t i = 0; i < N; ++i)
-	{
-		auto row = m1[i];
-		
-		for (std::size_t c = 0; c < N; c++)
-		{
-			// figure out the row here
-			row[c] = std::pow(W, (i* c) % N);
-		}
-	}
+Matrix<std::complex<double>> get_multiplier(std::size_t N);
+std::complex<double> get_from_basis(const std::vector<std::complex<double>>& basis, std::size_t N);
+Matrix<std::complex<double>> slow_fft(const signal& window);
+std::vector<std::size_t> partition_indices(const signal& in, std::vector<FFT_PARTITION>& order);
 
-	return m1;
-}
 
-inline const std::complex<double> get_from_basis(const std::vector<std::complex<double>>& basis, const std::size_t& N)
+
+std::complex<double> get_from_basis(const std::vector<std::complex<double>>& basis, std::size_t N)
 {
 	if (N < basis.size())
 	{
@@ -44,7 +40,7 @@ inline const std::complex<double> get_from_basis(const std::vector<std::complex<
 }
 
 
-Matrix<std::complex<double>> get_multiplier_f(const std::size_t N)
+Matrix<std::complex<double>> get_multiplier(std::size_t N)
 {
 	using namespace std::complex_literals;
 
@@ -73,18 +69,11 @@ Matrix<std::complex<double>> get_multiplier_f(const std::size_t N)
 
 Matrix<std::complex<double>> slow_fft(const signal& input)
 {
-	Matrix<std::complex<double>> multiplier = get_multiplier_f(input.n_rows());
+	Matrix<std::complex<double>> multiplier = get_multiplier(input.n_rows());
 	return multiplier * input;
 }
 
-enum class FFT_PARTITION : char
-{
-	ODD,
-	EVEN
-};
-
-#include <cmath>
-std::vector<std::size_t> fft_partition_indices(const signal& input, const std::vector<FFT_PARTITION>& order)
+std::vector<std::size_t> partition_indices(const signal& input, const std::vector<FFT_PARTITION>& order)
 {
 	std::vector<std::size_t> g_index; // odd
 
@@ -122,20 +111,22 @@ std::vector<std::size_t> fft_partition_indices(const signal& input, const std::v
 	return g_index;
 }
 
-Matrix<std::complex<double>> fast_fft_helper(const signal& input, const std::vector<FFT_PARTITION>& partition_order)
+Matrix<std::complex<double>> fft_helper(const signal& input, const std::vector<FFT_PARTITION>& partition_order)
 {
+	// Need something to make sure that the length
+	// is a power of 2
 	using namespace std::complex_literals;
 
 	auto half_divisor = static_cast<std::size_t>(1) << partition_order.size();
 	if ((input.n_rows() / half_divisor) > 8)
 	{
-		std::vector<FFT_PARTITION> even_partition_order{ begin(partition_order), end(partition_order) };
+		std::vector<FFT_PARTITION> even_partition_order{ partition_order };
 		even_partition_order.push_back(FFT_PARTITION::EVEN);
-		std::vector<FFT_PARTITION> odd_partition_order{ begin(partition_order), end(partition_order) };
+		std::vector<FFT_PARTITION> odd_partition_order{ partition_order };
 		odd_partition_order.push_back(FFT_PARTITION::ODD);
 
-		Matrix<std::complex<double>> even = fast_fft_helper(input, even_partition_order);
-		Matrix<std::complex<double>> odd = fast_fft_helper(input, odd_partition_order);
+		Matrix<std::complex<double>> even = fft_helper(input, even_partition_order);
+		Matrix<std::complex<double>> odd = fft_helper(input, odd_partition_order);
 
 		// Combine the results
 		const std::size_t N = (input.n_rows() / half_divisor);
@@ -158,7 +149,7 @@ Matrix<std::complex<double>> fast_fft_helper(const signal& input, const std::vec
 	else
 	{
 		// Partition the vector
-		auto indices = fft_partition_indices(input, partition_order);
+		auto indices = partition_indices(input, partition_order);
 		Matrix<std::complex<double>> partition{ input.n_rows() /  half_divisor, 1 };
 		for (std::size_t i = 0; i < partition.n_rows(); ++i)
 		{
@@ -171,13 +162,11 @@ Matrix<std::complex<double>> fast_fft_helper(const signal& input, const std::vec
 
 Matrix<std::complex<double>> fast_fft(const signal& input)
 {
-	auto h = fft_partition_indices(input, { FFT_PARTITION::EVEN });
-	auto g = fft_partition_indices(input, { FFT_PARTITION::ODD }); // Odd
-	return Matrix<std::complex<double>>{2, 2};
+	return fft_helper(input, {});
 }
 
 
-#include <functional>
+// TODO : This should be in the matrix  project
 template <typename T, typename U>
 Matrix<T> apply(std::function<T(const U&)> f, const Matrix<U>& m)
 {
@@ -193,7 +182,5 @@ Matrix<T> apply(std::function<T(const U&)> f, const Matrix<U>& m)
 	}
 	return result;
 }
-
-
 
 #endif // FOURIER_SLOW_FFT_H

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -145,12 +145,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="dft.h" />
     <ClInclude Include="matrix.h" />
     <ClInclude Include="matrix_exception.h" />
     <ClInclude Include="matrix_row.h" />
     <ClInclude Include="matrix_traits.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="slow_fft.h" />
+    <ClInclude Include="sft.h" />
+    <ClInclude Include="dft_operations.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fourier.cpp" />
