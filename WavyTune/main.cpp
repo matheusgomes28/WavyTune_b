@@ -11,11 +11,30 @@
 #include "Renderer/concrete_renderer.h"
 #include "render_builder.h"
 
+#include "Shaders/vs.glsl.h"
+#include "Shaders/vs_test.glsl.h"
+#include "Shaders/fs.glsl.h"
+#include "Shaders/fs_test.glsl.h"
+template<class T, size_t N>
+constexpr size_t size(T(&)[N])
+{
+	return N;
+}
+
+
+
 // More testing for why things arent working
-#include "GLAbstractions/vbo.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include <chrono>
+#include "Fourier/dft_operations.h"
+#include <cmath>
+
+
+#include "GLAbstractions/vao.h"
+#include "GLAbstractions/vbo.h"
+#include "GLAbstractions/vertex_attribute.h"
 
 struct Camera
 {
@@ -141,6 +160,29 @@ unsigned normalBufferId = 0;
 //int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 int main(int argc, char** argv)
 {
+	using namespace std::chrono_literals;
+	std::chrono::high_resolution_clock c;
+
+	// Getting a signal from sin, with frequency 16Hz
+	const double f = 0.25;
+	const double A = 1;
+	const double N = 64;
+	const double T = 1;
+	const double phi = 0;
+	Matrix<std::complex<double>> signal(N, 1);
+	for (std::size_t i = 0; i < N; ++i)
+	{
+		double x = 2.0 * MATH_PI * i * f * T + phi;
+		signal[i][0] = cos(x);
+	}
+
+	// Testing the fourier shit
+	std::function<double(const std::complex<double>&)> applier = [](const std::complex<double>& v) -> double
+	{
+		return std::abs(v);
+	};
+	
+
 	glewExperimental = GL_TRUE;
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -186,10 +228,18 @@ int main(int argc, char** argv)
 
 	// Create a bar renderer
 	RenderBuilder builder;
-	std::unique_ptr<AbstractRenderer> barRenderer = builder.buildBarRenderer();
-	barRenderer->send_gpu_data();
+
+	auto bar1 = builder.buildBarRenderer(vs, size(vs), fs, size(fs));
+	bar1->send_gpu_data();
+	auto bar2 = builder.buildBarRenderer(vs_test, size(vs_test), fs_test, size(fs_test));
+	bar2->set_height(2.0f);
+	bar2->set_offset(1.0f);
+	// bar2->send_gpu_data();
+	
+	
 
 	// Game loop
+	glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
 	while (!glfwWindowShouldClose(window)) {
 		lookAt = glm::lookAt(
 			cam.pos,
@@ -199,7 +249,9 @@ int main(int argc, char** argv)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		barRenderer->render(proj, lookAt);
+		bar1->render(proj, lookAt);
+		bar2->render(proj, lookAt);
+
 		glBindVertexArray(0);
 		glfwSwapBuffers(window);
 		glfwPollEvents();

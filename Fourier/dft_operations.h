@@ -12,6 +12,9 @@
 
 #define MATH_PI 3.14159265358979323846
 
+#define GET_BASIS( base_size, n)  \ ()
+
+
 using signal = Matrix<std::complex<double>>;
 
 enum class FFT_PARTITION : char
@@ -21,23 +24,9 @@ enum class FFT_PARTITION : char
 };
 
 Matrix<std::complex<double>> get_multiplier(std::size_t N);
-std::complex<double> get_from_basis(const std::vector<std::complex<double>>& basis, std::size_t N);
 Matrix<std::complex<double>> slow_fft(const signal& window);
 std::vector<std::size_t> partition_indices(const signal& in, std::vector<FFT_PARTITION>& order);
 
-
-
-std::complex<double> get_from_basis(const std::vector<std::complex<double>>& basis, std::size_t N)
-{
-	if (N < basis.size())
-	{
-		return basis[N];
-	}
-	else
-	{
-		return - basis[N - basis.size()];
-	}
-}
 
 
 Matrix<std::complex<double>> get_multiplier(std::size_t N)
@@ -46,25 +35,29 @@ Matrix<std::complex<double>> get_multiplier(std::size_t N)
 
 	const std::complex<double> W = std::exp(-(2.0 * MATH_PI / static_cast<double>(N)) * 1i);
 
+	// Generate the basis elements
 	std::vector<std::complex<double>> basis;
-	basis.reserve(N / 2);
-	for (std::size_t i = 0; i < N / 2; ++i)
+	const std::size_t basis_size = N / 2;
+	basis.reserve(basis_size);
+	for (std::size_t i = 0; i < basis_size; ++i)
 	{
 		basis.push_back(std::pow(W, i));
 	}
 	
 	// Generating the multiplier matrix
-	Matrix<std::complex<double>> m1{ N,N };
+	Matrix<std::complex<double>> multiplier{ N,N };
 	for (std::size_t i = 0; i < N; ++i)
 	{
-		auto row = m1[i];
+		auto row = multiplier[i];
 		for (std::size_t c = 0; c < N; c++)
 		{
 			// figure out the row here
-			row[c] = get_from_basis(basis, (i * c) % N);
+			const std::size_t basis_index = (i * c) % N;
+			row[c] = basis_index < basis_size ? 
+				     basis[basis_index] : -basis[basis_index - basis_size];
 		}
 	}
-	return m1;
+	return multiplier;
 }
 
 Matrix<std::complex<double>> slow_fft(const signal& input)
@@ -131,18 +124,25 @@ Matrix<std::complex<double>> fft_helper(const signal& input, const std::vector<F
 		// Combine the results
 		const std::size_t N = (input.n_rows() / half_divisor);
 		Matrix<std::complex<double>> ret{ N , 1 };
+		
+		// Get the basis components for the multipliers
+		// of the smaller transforms
 		std::vector<std::complex<double>> basis;
-		basis.reserve(N / 2);
+		std::size_t basis_size = N >> 1;
+		basis.reserve(basis_size);
 		const std::complex<double> W = std::exp(-(2.0 * MATH_PI / static_cast<double>(N)) * 1i);
-		for (std::size_t i = 0; i < N / 2; ++i)
+		for (std::size_t i = 0; i < basis_size; ++i)
 		{
 			basis.push_back(std::pow(W, i));
 		}
 
+		// Combine the smaller transforms, as in the
+		// decimation in time algorithm
 		for (std::size_t i = 0; i < ret.n_rows(); ++i)
 		{
-			auto index = i % (N >> 1);
-			ret[i][0] = even[index][0] + get_from_basis(basis, i) * odd[index][0];
+			std::size_t index = i % (N >> 1);
+			auto multiplier = i < basis_size ? basis[i] : - basis[i - basis_size];
+			ret[i][0] = even[index][0] + multiplier * odd[index][0];
 		}
 		return ret;
 	}
@@ -155,7 +155,6 @@ Matrix<std::complex<double>> fft_helper(const signal& input, const std::vector<F
 		{
 			partition[i][0] = input[indices[i]][0];
 		}
-
 		return slow_fft(partition);
 	}
 }
@@ -182,5 +181,4 @@ Matrix<T> apply(std::function<T(const U&)> f, const Matrix<U>& m)
 	}
 	return result;
 }
-
 #endif // FOURIER_SLOW_FFT_H
