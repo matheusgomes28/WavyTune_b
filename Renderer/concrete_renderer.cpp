@@ -23,8 +23,8 @@
 std::vector<std::string> getError()
 {
 	std::vector<std::string> retVal;
-	GLenum error = glGetError();
-	while (error = glGetError() != GL_NO_ERROR) {
+	GLenum error;
+	while ((error = glGetError()) != GL_NO_ERROR) {
 
 		switch (error)
 		{
@@ -88,15 +88,21 @@ void ConcreteRenderer::send_gpu_data()
 	points_to_draw_ = 0;
 	get_shader()->use();
 	glBindVertexArray(vao_->getId());
+	
+	std::vector<std::string> errors;
 
 	// Allocate enough memory at the buffers
 	_allocate_gpu_memory();
+	errors = getError();
 	_populate_gpu_buffers();
+	errors = getError();
 	_set_gpu_vertex_attributes();
+	errors = getError();
 	_set_gpu_normal_attributes();
+	errors = getError();
 	_set_gpu_colour_attributes();
+	errors = getError();
 
-	auto errors = getError();
 	get_shader()->unuse();
 }
 
@@ -191,13 +197,15 @@ void ConcreteRenderer::_set_gpu_normal_attributes()
 		);
 
 	vao_->addBufferConfigs(normal_vbo, std::move(normal_attrib));
-	glBindBuffer(GL_VERTEX_ARRAY, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void ConcreteRenderer::_set_gpu_colour_attributes()
 {
+	auto error = getError();
 	VBO* colour_vbo = vbos_[BUFFER_TYPE::COLOUR].get();
 	glBindBuffer(GL_ARRAY_BUFFER, colour_vbo->getId());
+	error = getError();
 
 	auto colour_attribute = std::make_unique<VertexAttribute>();
 	colour_attribute->setOffset(0);
@@ -208,6 +216,7 @@ void ConcreteRenderer::_set_gpu_colour_attributes()
 
 	// Get the layout location
 	GLint colPtr = glGetAttribLocation(get_shader()->get_address(), "aCol");
+	error = getError();
 
 	glVertexAttribPointer(
 		colPtr,
@@ -217,9 +226,11 @@ void ConcreteRenderer::_set_gpu_colour_attributes()
 		colour_attribute->getStride(),
 		(GLvoid*)colour_attribute->getOffset()
 		);
+	error = getError();
 
 	vao_->addBufferConfigs(colour_vbo, std::move(colour_attribute));
-	glBindBuffer(GL_VERTEX_ARRAY, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	error = getError();
 }
 
 void ConcreteRenderer::render(const glm::mat4& proj, const glm::mat4& view)
@@ -246,10 +257,11 @@ void ConcreteRenderer::render(const glm::mat4& proj, const glm::mat4& view)
 	// Enabling some features
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+	
+	glBindVertexArray(vao_->getId());
 	_enable_gpu_buffers();
 
 	// Enable vertices and normals for drawing
-	glBindVertexArray(vao_->getId());
 	glDrawArrays(GL_TRIANGLES, 0, points_to_draw_);
 	glBindVertexArray(0);
 
