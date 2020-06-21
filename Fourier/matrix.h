@@ -8,6 +8,7 @@
 // includes from the STD
 #include <cstdlib>
 #include <type_traits>
+#include <vector>
 
 template <typename T, typename _Matrix_Traits>
 class Matrix_T
@@ -140,9 +141,8 @@ public:
 
 	Matrix_T<non_const_T, _Matrix_Traits> operator*(const Matrix_T<T, _Matrix_Traits>& B) const
 	{
-		if (n_rows_ == B.n_rows_)
+		if (n_cols_ == B.n_rows_)
 		{
-			// TODO : implement type trait for default value
 			Matrix_T<non_const_T, _Matrix_Traits> result{ n_rows_, B.n_cols_ };
 
 			for (std::size_t row = 0; row < n_rows_; ++row)
@@ -160,6 +160,26 @@ public:
 			return result;
 		}
 		throw MatrixException("cannot multiply matrices with different inner dimensions");
+	}
+
+	Matrix_T<non_const_T, _Matrix_Traits> operator*(const std::vector<T>& col_vec)
+	{
+		if (n_cols_ == col_vec.size())
+		{
+			Matrix_T<non_const_T, _Matrix_Traits> result{ n_rows_, 1 };
+			for (std::size_t row = 0; row < n_rows_; ++row)
+			{
+				MatrixRow<non_const_T, _Matrix_Traits> this_row = (*this)[row];
+				MatrixRow<non_const_T, _Matrix_Traits> result_row = result[row];
+				for (std::size_t i = 0; i < col_vec.size(); ++i)
+				{
+					result_row[i] += this_row[i] * col_vec[i];
+				}
+			}
+
+			return result;
+		}
+		throw MatrixException("cannot multiply matrix by vector of different size")
 	}
 
 	Matrix_T<T, _Matrix_Traits>& operator=(const std::initializer_list<T>& values)
