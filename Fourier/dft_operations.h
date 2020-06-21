@@ -20,7 +20,6 @@ enum class FFT_PARTITION : char
 	EVEN
 };
 
-Matrix<std::complex<double>> get_multiplier(std::size_t N);
 Matrix<std::complex<double>> slow_fft(const signal& window);
 std::vector<std::size_t> partition_indices(const signal& in, std::vector<FFT_PARTITION>& order);
 Matrix<std::complex<double>> fast_fft(const signal& input);
@@ -42,3 +41,4 @@ Matrix<T> apply(std::function<T(const U&)> f, const Matrix<U>& m)
 	return result;
 }
 #endif // FOURIER_SLOW_FFT_H
+
