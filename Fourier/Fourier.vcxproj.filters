@@ -47,6 +47,9 @@
     <ClCompile Include="fourier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dft_operations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
