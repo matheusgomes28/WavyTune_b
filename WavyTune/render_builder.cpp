@@ -9,8 +9,6 @@
 
 #include "Renderer/concrete_renderer.h"
 
-#include "Shaders/vs.glsl.h"
-#include "Shaders/fs.glsl.h"
 #include "Shaders/shader_builder.h"
 
 template<class T, size_t N>
@@ -19,7 +17,7 @@ constexpr size_t size(T(&)[N])
 	return N;
 }
 
-std::unique_ptr<AbstractRenderer> RenderBuilder::buildBarRenderer()
+std::unique_ptr<ConcreteRenderer> RenderBuilder::buildBarRenderer(unsigned char* vs, std::size_t vs_size, unsigned char* fs, std::size_t fs_size)
 {
 	auto retVal = std::make_unique<ConcreteRenderer>();
 
@@ -30,54 +28,54 @@ std::unique_ptr<AbstractRenderer> RenderBuilder::buildBarRenderer()
 	std::vector<glm::vec3> vertex_array = {
 
 		// Plane 1
-		{-0.5, -0.5, -0.5},
-		{ 0.5, -0.5, -0.5},
-		{-0.5,  0.5, -0.5},
-		{ 0.5, -0.5, -0.5},
-		{ 0.5,  0.5, -0.5},
-		{-0.5,  0.5, -0.5},
+		{-0.5,  0.0, -0.5},
+		{ 0.5,  0.0, -0.5},
+		{-0.5,  1.0, -0.5},
+		{ 0.5,  0.0, -0.5},
+		{ 0.5,  1.0, -0.5},
+		{-0.5,  1.0, -0.5},
 
 		// Plane 2
-		{-0.5, -0.5,  0.5},
-		{ 0.5, -0.5,  0.5},
-		{-0.5,  0.5,  0.5},
-		{ 0.5, -0.5,  0.5},
-		{ 0.5,  0.5,  0.5},
-		{-0.5,  0.5,  0.5},
+		{-0.5,  0.0,  0.5},
+		{ 0.5,  0.0,  0.5},
+		{-0.5,  1.0,  0.5},
+		{ 0.5,  0.0,  0.5},
+		{ 0.5,  1.0,  0.5},
+		{-0.5,  1.0,  0.5},
 
 
 		// Plane 3
-		{-0.5, -0.5, -0.5},
-		{-0.5, -0.5,  0.5},
-		{-0.5,  0.5, -0.5},
-		{-0.5, -0.5,  0.5},
-		{-0.5,  0.5,  0.5},
-		{-0.5,  0.5, -0.5},
+		{-0.5,  0.0, -0.5},
+		{-0.5,  0.0,  0.5},
+		{-0.5,  1.0, -0.5},
+		{-0.5,  0.0,  0.5},
+		{-0.5,  1.0,  0.5},
+		{-0.5,  1.0, -0.5},
 
 
 		// Plane 4
-		{ 0.5, -0.5, -0.5},
-		{ 0.5, -0.5,  0.5},
-		{ 0.5,  0.5, -0.5},
-		{ 0.5, -0.5,  0.5},
-		{ 0.5,  0.5,  0.5},
-		{ 0.5,  0.5, -0.5},
+		{ 0.5,  0.0, -0.5},
+		{ 0.5,  0.0,  0.5},
+		{ 0.5,  1.0, -0.5},
+		{ 0.5,  0.0,  0.5},
+		{ 0.5,  1.0,  0.5},
+		{ 0.5,  1.0, -0.5},
 
 		// Plane 5
-		{-0.5,  0.5, -0.5},
-		{ 0.5,  0.5, -0.5},
-		{-0.5,  0.5,  0.5},
-		{-0.5,  0.5,  0.5},
-		{ 0.5,  0.5, -0.5},
-		{ 0.5,  0.5,  0.5},
+		{-0.5,  1.0, -0.5},
+		{ 0.5,  1.0, -0.5},
+		{-0.5,  1.0,  0.5},
+		{-0.5,  1.0,  0.5},
+		{ 0.5,  1.0, -0.5},
+		{ 0.5,  1.0,  0.5},
 
 		// Plane 6
-		{-0.5, -0.5, -0.5},
-		{ 0.5, -0.5, -0.5},
-		{-0.5, -0.5,  0.5},
-		{-0.5, -0.5,  0.5},
-		{ 0.5, -0.5, -0.5},
-		{ 0.5, -0.5,  0.5}
+		{-0.5,  0.0, -0.5},
+		{ 0.5,  0.0, -0.5},
+		{-0.5,  0.0,  0.5},
+		{-0.5,  0.0,  0.5},
+		{ 0.5,  0.0, -0.5},
+		{ 0.5,  0.0,  0.5}
 	};
 	auto vertices = std::make_unique<DrawData3>();
 	vertices->setData(vertex_array);
@@ -198,8 +196,8 @@ std::unique_ptr<AbstractRenderer> RenderBuilder::buildBarRenderer()
 	// Create the shader stuff here
 	// TODO : Turn these into a builder
 	ShaderBuilder shader_builder;
-	shader_builder.set_fragment_shader({fs, size(fs)});
-	shader_builder.set_vertex_shader({vs, size(vs)});
+	shader_builder.set_fragment_shader({fs, fs_size});
+	shader_builder.set_vertex_shader({vs, vs_size});
 	auto shader_program = shader_builder.build();
 	shader_program->compile_and_link();
 	retVal->set_shader(std::move(shader_program));

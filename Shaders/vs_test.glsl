@@ -15,6 +15,6 @@ uniform float offset;
 void main()
 {
     normal = aNor.yzx;
-    colour = vec4(aCol.x + normal.x, aCol.y, aCol.z, aCol.w);
+    colour = vec4(aNor.x, aCol.x, 0.9f, 1.0);
     gl_Position = proj*view*rotate*vec4(aPos.x + offset, aPos.y * height, aPos.z, 1.0);
 }

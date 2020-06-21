@@ -12,7 +12,7 @@
 
 #define MATH_PI 3.14159265358979323846
 
-using signal = Matrix<std::complex<double>>;
+using signal = std::vector<std::complex<double>>;
 
 enum class FFT_PARTITION : char
 {

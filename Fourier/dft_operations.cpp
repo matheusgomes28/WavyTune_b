@@ -59,7 +59,7 @@ std::vector<std::size_t> partition_indices(const signal& input, const std::vecto
 	// Get the starting value 
 	std::size_t i = g_start;
 	skip = static_cast<std::size_t>(1) << order.size();
-	while (i < input.n_rows())
+	while (i < input.size())
 	{
 		g_index.push_back(i);
 		i += skip;
@@ -82,7 +82,7 @@ Matrix<std::complex<double>> fft_helper(const signal& input, const std::vector<F
 	using namespace std::complex_literals;
 
 	auto half_divisor = static_cast<std::size_t>(1) << partition_order.size();
-	if ((input.n_rows() / half_divisor) > 8)
+	if ((input.size() / half_divisor) > 8)
 	{
 		std::vector<FFT_PARTITION> even_partition_order{ partition_order };
 		even_partition_order.push_back(FFT_PARTITION::EVEN);
@@ -93,7 +93,7 @@ Matrix<std::complex<double>> fft_helper(const signal& input, const std::vector<F
 		Matrix<std::complex<double>> odd = fft_helper(input, odd_partition_order);
 
 		// Combine the results
-		const std::size_t N = (input.n_rows() / half_divisor);
+		const std::size_t N = (input.size() / half_divisor);
 		Matrix<std::complex<double>> ret{ N , 1 };
 		
 		// Get the basis components for the multipliers
@@ -120,10 +120,11 @@ Matrix<std::complex<double>> fft_helper(const signal& input, const std::vector<F
 	{
 		// Partition the vector
 		auto indices = partition_indices(input, partition_order);
-		Matrix<std::complex<double>> partition{ input.n_rows() /  half_divisor, 1 };
-		for (std::size_t i = 0; i < partition.n_rows(); ++i)
+		std::vector<std::complex<double>> partition;
+		partition.reserve(input.size() / half_divisor);
+		for (std::size_t i = 0; i < indices.size(); ++i)
 		{
-			partition[i][0] = input[indices[i]][0];
+			partition.push_back(input[indices[i]]);
 		}
 		return slow_fft(partition);
 	}
@@ -131,7 +132,7 @@ Matrix<std::complex<double>> fft_helper(const signal& input, const std::vector<F
 
 Matrix<std::complex<double>> slow_fft(const signal& input)
 {
-	Matrix<std::complex<double>> multiplier = get_multiplier(input.n_rows());
+	Matrix<std::complex<double>> multiplier = get_multiplier(input.size());
 	return multiplier * input;
 }
 

@@ -15,6 +15,72 @@
 #include "Shaders/vs_test.glsl.h"
 #include "Shaders/fs.glsl.h"
 #include "Shaders/fs_test.glsl.h"
+
+#include "DataStructures/byte_array.h"
+
+#include <thread>
+#include <complex>
+
+extern "C"
+{
+#include "portaudio.h"
+
+typedef struct
+{
+	float left_phase;
+	float right_phase;
+} paTestData;
+
+static int patestCallback(const void* input_buffer, void* output_buffer,
+						  unsigned long frames_per_buffer,
+	                      const PaStreamCallbackTimeInfo* time_info,
+						  PaStreamCallbackFlags status_flag, 
+	                      void* user_data);
+}
+
+static paTestData data = {-1.0f, -1.0f};
+
+static std::mutex buffer_mutex;
+static std::vector<std::complex<double>> buffer;
+
+static int patestCallback(const void* input_buffer, void* output_buffer,
+	unsigned long frames_per_buffer,
+	const PaStreamCallbackTimeInfo* time_info,
+	PaStreamCallbackFlags status_flag,
+	void* user_data)
+{
+	/* Cast data passed through stream to our structure. */
+	paTestData* data = (paTestData*)user_data;
+	float* out = (float*)output_buffer;
+	unsigned int i;
+	(void)input_buffer; /* Prevent unused variable warning. */
+
+	/* Buffer for the transform */
+	std::vector<std::complex<double>> buffer_vals;
+	buffer_vals.reserve(frames_per_buffer);
+
+	float diff = 0.02f;
+	for (i = 0; i < frames_per_buffer; i++)
+	{
+		*out++ = data->left_phase;  /* left */
+		*out++ = data->right_phase;  /* right */
+		/* Generate simple sawtooth phaser that ranges between -1.0 and 1.0. */
+		data->left_phase += diff;
+		/* When signal reaches top, drop back down. */
+		/* higher pitch so we can distinguish left and right. */
+		data->right_phase += diff;
+		if (data->right_phase >= 1.0f) diff = - diff;
+		
+		buffer_vals.push_back(data->left_phase);
+	}
+
+	std::lock_guard<std::mutex> buffer_lock{ buffer_mutex };
+	buffer = buffer_vals;
+	return 0;
+}
+
+
+
 template<class T, size_t N>
 constexpr size_t size(T(&)[N])
 {
@@ -163,17 +229,34 @@ int main(int argc, char** argv)
 	using namespace std::chrono_literals;
 	std::chrono::high_resolution_clock c;
 
+	auto error = Pa_Initialize();
+	if (error != paNoError)
+	{
+		std::cout << "Audio error" << std::endl;
+	}
+
+	PaStream* stream;
+	auto err = Pa_OpenDefaultStream(&stream,
+		0,
+		2,
+		paFloat32,
+		44100,
+		256,
+		patestCallback,
+		&data);
+	Pa_StartStream(stream);
+
 	// Getting a signal from sin, with frequency 16Hz
 	const double f = 0.25;
 	const double A = 1;
 	const double N = 64;
 	const double T = 1;
 	const double phi = 0;
-	Matrix<std::complex<double>> signal(N, 1);
+	std::vector<std::complex<double>> signal;
 	for (std::size_t i = 0; i < N; ++i)
 	{
 		double x = 2.0 * MATH_PI * i * f * T + phi;
-		signal[i][0] = cos(x);
+		signal.emplace_back(cos(x));
 	}
 
 	// Testing the fourier shit
@@ -181,6 +264,8 @@ int main(int argc, char** argv)
 	{
 		return std::abs(v);
 	};
+	auto transform = fast_fft(signal);
+	auto result = apply(applier, transform);
 	
 
 	glewExperimental = GL_TRUE;
@@ -229,32 +314,51 @@ int main(int argc, char** argv)
 	// Create a bar renderer
 	RenderBuilder builder;
 
-	auto bar1 = builder.buildBarRenderer(vs, size(vs), fs, size(fs));
-	bar1->send_gpu_data();
-	auto bar2 = builder.buildBarRenderer(vs_test, size(vs_test), fs_test, size(fs_test));
-	bar2->set_height(2.0f);
-	bar2->set_offset(1.0f);
-	// bar2->send_gpu_data();
-	
-	
+	std::vector<std::unique_ptr<ConcreteRenderer>> renderers;
+	for (std::size_t i = 0; i < result.n_rows(); ++i)
+	{
+		renderers.push_back(builder.buildBarRenderer(vs, size(vs), fs, size(fs)));
+		renderers[i]->set_offset(1.0f * i);
+		renderers[i]->send_gpu_data();
+	}
 
-	// Game loop
+	// Game loop - Main OpenGL rendering
 	glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
 	while (!glfwWindowShouldClose(window)) {
 		lookAt = glm::lookAt(
 			cam.pos,
 			cam.pos + cam.getDirection(),
 			cam.getUp()
-			);
+		);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		bar1->render(proj, lookAt);
-		bar2->render(proj, lookAt);
+
+		// Temporary code to make sure we can tran
+		std::unique_lock<std::mutex> buffer_lock{ buffer_mutex };
+		transform = fast_fft(buffer);
+		buffer_lock.unlock();
+		result = apply(applier, transform);
+		
+
+		// Render all
+		for (std::size_t i = 0; i < renderers.size(); ++i)
+		{
+			renderers[i]->set_height(result[i][0]);
+			renderers[i]->render(proj, lookAt);
+		}
 
 		glBindVertexArray(0);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+	}
+
+
+	// Uninit the audio engine
+	error = Pa_Terminate();
+	if (error != paNoError)
+	{
+		std::cout << "ERROR" << std::endl;
 	}
 	return 0;
 }

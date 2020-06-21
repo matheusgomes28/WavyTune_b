@@ -4,11 +4,12 @@
 #include <memory>
 
 class AbstractRenderer;
+class ConcreteRenderer;
 class RenderBuilder
 {
 public:
 	// TODO : Make this into a proper builder
-	std::unique_ptr<AbstractRenderer> buildBarRenderer();
+	std::unique_ptr<ConcreteRenderer> buildBarRenderer(unsigned char* vs, std::size_t vs_size, unsigned char* fs, std::size_t fs_size);
 
 
 	/*

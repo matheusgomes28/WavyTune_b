@@ -173,13 +173,13 @@ public:
 				MatrixRow<non_const_T, _Matrix_Traits> result_row = result[row];
 				for (std::size_t i = 0; i < col_vec.size(); ++i)
 				{
-					result_row[i] += this_row[i] * col_vec[i];
+					result_row[0] += this_row[i] * col_vec[i];
 				}
 			}
 
 			return result;
 		}
-		throw MatrixException("cannot multiply matrix by vector of different size")
+		throw MatrixException("cannot multiply matrix by vector of different size");
 	}
 
 	Matrix_T<T, _Matrix_Traits>& operator=(const std::initializer_list<T>& values)
